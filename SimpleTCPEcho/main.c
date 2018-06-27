@@ -59,7 +59,8 @@ int main(int argc, char* argv[])
 	
 	int sock_new;
 	struct sockaddr_storage their_addr;
-	while((sock_new = accept(sock_local, &their_addr, sizeof(their_addr))) != -1)
+	socklen_t addr_size = sizeof(their_addr);
+	while((sock_new = accept(sock_local, (struct sockaddr *)&their_addr, &addr_size)) != -1)
 	{
 		// new connection
 		printf("- Info: new connection, socket: %d\n", sock_new);
@@ -74,7 +75,7 @@ int main(int argc, char* argv[])
 		{
 			recvd += currec;
 			int cursent;
-			if((cursent = send(sock_new, buff, sizeof(buff), 0)) == -1)
+			if((cursent = send(sock_new, buff, currec, 0)) == -1)
 			{
 				printf("- Error: send failed, errno=%d\n", errno);
 				return 1;
