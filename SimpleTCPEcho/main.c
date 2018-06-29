@@ -1,21 +1,50 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#ifdef __linux__ 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <string.h>
-#include <errno.h>
+#else
+#include <sys/types.h>
+#include <winsock2.h>
+#include <ws2def.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#pragma comment(lib, "Ws2_32.lib")
+typedef int socklen_t;
+#endif
+
+
 
 int get_port(struct sockaddr *sa)
 {
+#ifndef __linux__
+	return ntohs(((struct sockaddr_in*)sa)->sin_port);
+#else
     if (sa->sa_family == AF_INET)
         return ntohs(((struct sockaddr_in*)sa)->sin_port);
 
     return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+#endif
 }
 
 int main(int argc, char* argv[])
 {
+#ifndef __linux__ 
+	//----------------------
+	// Initialize Winsock.
+	WSADATA wsaData;
+	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != NO_ERROR) {
+		wprintf(L"WSAStartup failed with error: %ld\n", iResult);
+		return 1;
+	}
+#endif
+
+
 	char* port = "3000";
 	if(argc == 2)
 		port = argv[1];
