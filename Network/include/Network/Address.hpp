@@ -8,6 +8,7 @@
 #else if __linux__
 #include <sys/types.h>
 #endif
+#include <Network/types.hpp>
 
 struct IPv4 {
 	union {
@@ -29,17 +30,21 @@ public:
 	~Address();
 
 	unsigned short getPort() const;
-	void setPort(short value);
+	Address setPort(short value);
 
-	void setIP(IPv4 value);
-	void setIP(IPv6 value);
+	void setIP(const IPv4& value);
+	void setIP(const IPv6& value);
 
-	std::string getPresentation();
+	Protocol getProtocol() const;
+
+	std::string getPresentation() const;
 	static std::vector<Address> fromPresentationAll(const std::string& rep);
 	static Address fromPresentation(const std::string& rep);
 	static Address localhost();
 	static Address broadcast();
 
 private:
+	friend class Socket;
 	sockaddr_storage m_addr;
+	bool m_valid = false;
 };

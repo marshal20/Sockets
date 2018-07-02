@@ -4,6 +4,7 @@ set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 add_subdirectory(Network)
 add_subdirectory(test)
+add_subdirectory(test2)
 
 #add_subdirectory(DomainNameToIP)
 #add_subdirectory(SimpleTCPEcho)

@@ -1,8 +1,8 @@
 #include "Network/Address.hpp"
-
 #include <stdio.h>
 #include <string.h>
 #include <exception>
+#include "sockImpl.hpp"
 
 Address::Address()
 {
@@ -14,6 +14,8 @@ Address::~Address()
 
 unsigned short Address::getPort() const
 {
+	if (!m_valid) return 0;
+
 	// IPv4
 	if (m_addr.ss_family == AF_INET)
 	{
@@ -24,37 +26,52 @@ unsigned short Address::getPort() const
 	return ntohs(((sockaddr_in6*)&m_addr)->sin6_port);
 }
 
-void Address::setPort(short value)
+Address Address::setPort(short value)
 {
+	m_valid = true;
 	// IPv4
 	if (m_addr.ss_family == AF_INET)
 	{
 		((sockaddr_in*)&m_addr)->sin_port = htons(value);
-		return;
+		return *this;
 	}
 
 	// IPv6
 	((sockaddr_in6*)&m_addr)->sin6_port = htons(value);
+	return *this;
 }
 
-void Address::setIP(IPv4 value)
+void Address::setIP(const IPv4& value)
 {
+	m_valid = true;
 	m_addr.ss_family = AF_INET;
 	((sockaddr_in*)&m_addr)->sin_addr.S_un.S_addr = htonl(value.val);
 }
 
-void Address::setIP(IPv6 value)
+void Address::setIP(const IPv6& value)
 {
-	m_addr.ss_family = AF_INET6;
-	unsigned short conv[8] = { htons(value.a), htons(value.b),
-								htons(value.c), htons(value.d),
-								htons(value.e), htons(value.f),
-								htons(value.g), htons(value.h) };
-	memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
+m_valid = true;
+m_addr.ss_family = AF_INET6;
+unsigned short conv[8] = { htons(value.a), htons(value.b),
+							htons(value.c), htons(value.d),
+							htons(value.e), htons(value.f),
+							htons(value.g), htons(value.h) };
+memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
 }
 
-std::string Address::getPresentation()
+Protocol Address::getProtocol() const
 {
+	// IPv4
+	if (m_addr.ss_family == PF_INET) return Protocol::IPv4;
+
+	// IPv6
+	return Protocol::IPv6;
+}
+
+std::string Address::getPresentation() const
+{
+	if (!m_valid) return "Invalid address";
+
 	static const int temp_len = INET6_ADDRSTRLEN;
 	static char temp[temp_len + 1];
 	void* addr;
@@ -69,7 +86,7 @@ std::string Address::getPresentation()
 		struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)&m_addr;
 		addr = &(ipv6->sin6_addr);
 	}
-	
+
 	inet_ntop(m_addr.ss_family, addr, temp, temp_len);
 
 	temp[temp_len] = '\0';
@@ -88,7 +105,7 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	int code = getaddrinfo(domainname, NULL, &hints, &res);
+	int code = sockImpl::getaddrinfo(domainname, NULL, &hints, &res);
 	if (code != 0)
 	{
 		std::string msg = "getaddrinfo() error: " + std::string(gai_strerrorA(code));
@@ -108,6 +125,7 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 		{
 
 		}
+		temp.m_valid = true;
 		addrs.push_back(temp);
 	}
 
@@ -123,8 +141,23 @@ Address Address::fromPresentation(const std::string& rep)
 
 Address Address::localhost()
 {
-	// TODO
-	return Address();
+	Address temp;
+	struct addrinfo hint, *res;
+	int code;
+	memset(&hint, 0, sizeof(struct addrinfo));
+	hint.ai_family = AF_INET;
+
+	if ((code = getaddrinfo("localhost", NULL, &hint, &res)) != 0)
+	{
+		std::string msg = "getaddrinfo() error: " + std::string(gai_strerrorA(code));
+		throw std::exception(msg.c_str(), code);
+	}
+	temp.m_valid = true;
+	int struct_size = (res->ai_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	memcpy(&temp.m_addr, res->ai_addr, struct_size);
+	freeaddrinfo(res);
+
+	return temp;
 }
 
 Address Address::broadcast()
@@ -133,34 +166,3 @@ Address Address::broadcast()
 	return Address();
 }
 
-
-#if WIN32
-#include <ws2tcpip.h>
-#include <ws2def.h>
-#include <stdio.h>
-
-// https://docs.microsoft.com/en-us/windows/desktop/WinSock/complete-client-code
-
-struct WindowsSocket2Init
-{
-	WindowsSocket2Init()
-	{
-		printf("Initializing\n");
-		WSADATA wsaData;
-		int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-		if (iResult != NO_ERROR) {
-			//wprintf(L"WSAStartup failed with error: %ld\n", iResult);
-			//return 1;
-			printf("WSAStartup failed with error: %ld\n", iResult);
-		}
-		printf("WSAStartup succeded\n");
-	}
-
-	~WindowsSocket2Init()
-	{
-		WSACleanup();
-	}
-};
-
-WindowsSocket2Init global_ws2init;
-#endif
