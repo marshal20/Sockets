@@ -123,7 +123,6 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 
 	for (it = res; it != NULL; it = it->ai_next)
 	{
-		printf("%X\n", it);
 		Address temp;
 		addrinfoTosockaddrstorage(it, &temp.m_addr);
 		temp.m_valid = true;
