@@ -3,7 +3,6 @@
 #include <exception>
 #include <sys/types.h>
 #include <errno.h>
-#include <iostream>
 
 Socket::Socket(Type type, Protocol family)
 {
@@ -25,10 +24,8 @@ Socket::~Socket()
 void Socket::bind(const Address& addr)
 {
 	int len = (addr.getProtocol() == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-	std::cout << "Bind: " << addr.getPresentation() << ":" << addr.getPort() << std::endl;
 	if (::bind(m_sock, (const sockaddr*)&(addr.m_addr), len) == -1)
 	{
-		printf("%d\n", errno);
 		throw std::exception("Bind error.", errno);
 	}
 }

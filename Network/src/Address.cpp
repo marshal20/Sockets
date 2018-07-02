@@ -4,8 +4,16 @@
 #include <exception>
 #include "sockImpl.hpp"
 
+void addrinfoTosockaddrstorage(addrinfo* src, sockaddr_storage* dst)
+{
+	memset(dst, 0, sizeof(sockaddr_storage));
+	int struct_size = (src->ai_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	memcpy(dst, src->ai_addr, struct_size);
+}
+
 Address::Address()
 {
+
 }
 
 Address::~Address()
@@ -103,7 +111,7 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
+	//hints.ai_socktype = SOCK_STREAM;
 
 	int code = sockImpl::getaddrinfo(domainname, NULL, &hints, &res);
 	if (code != 0)
@@ -115,16 +123,7 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 	for (it = res; it != NULL; it = it->ai_next)
 	{
 		Address temp;
-		int struct_size = (it->ai_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-		memcpy(&temp.m_addr, it->ai_addr, struct_size);
-		if (it->ai_family == PF_INET)
-		{
-
-		}
-		else
-		{
-
-		}
+		addrinfoTosockaddrstorage(it, &temp.m_addr);
 		temp.m_valid = true;
 		addrs.push_back(temp);
 	}
@@ -153,8 +152,7 @@ Address Address::localhost()
 		throw std::exception(msg.c_str(), code);
 	}
 	temp.m_valid = true;
-	int struct_size = (res->ai_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-	memcpy(&temp.m_addr, res->ai_addr, struct_size);
+	addrinfoTosockaddrstorage(res, &temp.m_addr);
 	freeaddrinfo(res);
 
 	return temp;
