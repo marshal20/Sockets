@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <exception>
+#include <stdexcept>
 #include "sockImpl.hpp"
 
-void addrinfoTosockaddrstorage(addrinfo* src, sockaddr_storage* dst)
+void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {
 	memset(dst, 0, sizeof(sockaddr_storage));
 	int struct_size = (src->ai_family == AF_INET) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
@@ -53,7 +54,7 @@ void Address::setIP(const IPv4& value)
 {
 	m_valid = true;
 	m_addr.ss_family = AF_INET;
-	((sockaddr_in*)&m_addr)->sin_addr.S_un.S_addr = htonl(value.val);
+	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
 }
 
 void Address::setIP(const IPv6& value)
@@ -111,17 +112,18 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
-	//hints.ai_socktype = SOCK_STREAM;
+	hints.ai_socktype = SOCK_STREAM;
 
 	int code = sockImpl::getaddrinfo(domainname, NULL, &hints, &res);
 	if (code != 0)
 	{
-		std::string msg = "getaddrinfo() error: " + std::string(gai_strerrorA(code));
-		throw std::exception(msg.c_str(), code);
+		std::string msg = "getaddrinfo() error: " + std::string(gai_strerror(code));
+		throw std::runtime_error(msg.c_str());
 	}
 
 	for (it = res; it != NULL; it = it->ai_next)
 	{
+		printf("%X\n", it);
 		Address temp;
 		addrinfoTosockaddrstorage(it, &temp.m_addr);
 		temp.m_valid = true;
@@ -148,8 +150,8 @@ Address Address::localhost()
 
 	if ((code = getaddrinfo("localhost", NULL, &hint, &res)) != 0)
 	{
-		std::string msg = "getaddrinfo() error: " + std::string(gai_strerrorA(code));
-		throw std::exception(msg.c_str(), code);
+		std::string msg = "getaddrinfo() error: " + std::string(gai_strerror(code));
+		throw std::runtime_error(msg.c_str());
 	}
 	temp.m_valid = true;
 	addrinfoTosockaddrstorage(res, &temp.m_addr);

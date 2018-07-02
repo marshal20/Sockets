@@ -9,8 +9,8 @@ int main(int argc, char* argv[]) try
 		return 1;
 	}
 	char* domainName = argv[1];
-	std::cout << "Addresses for " << domainName << ":" << std::endl;
 	std::vector<Address> addrs = Address::fromPresentationAll(domainName);
+	std::cout << "Addresses(" << addrs.size() << ") for " << domainName << ":" << std::endl;
 	for (auto addr : addrs)
 		std::cout << ProtocolToString(addr.getProtocol()) << ": " << addr.getPresentation() << std::endl;
 
