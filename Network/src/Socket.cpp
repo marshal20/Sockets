@@ -52,6 +52,7 @@ int Socket::recv(void* buff, int len)
 	if((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
 		Error::runtime("recv failed", errno);
 
+	m_monitor.recv += recieved;
 	return recieved;
 }
 
@@ -61,5 +62,15 @@ int Socket::send(const void* buff, int len)
 	if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
 		Error::runtime("send failed", errno);
 
+	m_monitor.sent += sent;
 	return sent;
+}
+
+
+int Socket::getTotalrecv() const {
+	return m_monitor.recv;
+}
+
+int Socket::getTotalsent() const {
+	return m_monitor.sent;
 }

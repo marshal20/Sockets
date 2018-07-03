@@ -23,20 +23,15 @@ int main(int argc, char* argv[])
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr.getPresentation() << std::endl;
 		
-		int recvd = 0;
-		int sent = 0;
-
 		char buff[1024];
 		int currec;
 		while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
 		{
-			recvd += currec;
-			int cursent;
-			cursent = new_sock.send(buff, currec);
-			sent += cursent;
+			new_sock.send(buff, currec);
 		}
 
-		printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n", recvd, sent);
+		printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
+			new_sock.getTotalrecv(), new_sock.getTotalsent());
 	}
 
 	return 0;

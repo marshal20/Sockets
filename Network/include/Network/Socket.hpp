@@ -22,9 +22,17 @@ public:
 	int recv(void* buff, int len);
 	int send(const void* buff, int len);
 
+	int getTotalrecv() const;
+	int getTotalsent() const;
+
 private:
 	int m_sock = -1;
 	Type m_type = Type::Stream;
 	Protocol m_protocol = Protocol::IPv4;
+	struct Monitor
+	{
+		int recv;
+		int sent;
+	} m_monitor = { 0, 0 };
 };
 
