@@ -1,8 +1,5 @@
 #include "Network/Address.hpp"
-#include <stdio.h>
-#include <string.h>
-#include <exception>
-#include <stdexcept>
+#include "errors.hpp"
 #include "sockImpl.hpp"
 
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
@@ -116,10 +113,7 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 
 	int code = sockImpl::getaddrinfo(domainname, NULL, &hints, &res);
 	if (code != 0)
-	{
-		std::string msg = "getaddrinfo() error: " + std::string(gai_strerror(code));
-		throw std::runtime_error(msg.c_str());
-	}
+		Error::runtime("getaddrinfo failed", gai_strerror(code), code);
 
 	for (it = res; it != NULL; it = it->ai_next)
 	{
@@ -147,11 +141,9 @@ Address Address::localhost()
 	memset(&hint, 0, sizeof(struct addrinfo));
 	hint.ai_family = AF_INET;
 
-	if ((code = getaddrinfo("localhost", NULL, &hint, &res)) != 0)
-	{
-		std::string msg = "getaddrinfo() error: " + std::string(gai_strerror(code));
-		throw std::runtime_error(msg.c_str());
-	}
+	if ((code = sockImpl::getaddrinfo("localhost", NULL, &hint, &res)) != 0)
+		Error::runtime("getaddrinfo failed", gai_strerror(code), code);
+
 	temp.m_valid = true;
 	addrinfoTosockaddrstorage(res, &temp.m_addr);
 	freeaddrinfo(res);

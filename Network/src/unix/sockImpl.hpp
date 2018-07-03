@@ -4,8 +4,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-typedef int SocketHandle;
-
 class sockImpl
 {
 public:
@@ -13,6 +11,6 @@ public:
 	~sockImpl();
 
 	static int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
-	static SocketHandle socket(int af, int type, int protocol);
+	static int socket(int af, int type, int protocol);
 
 };

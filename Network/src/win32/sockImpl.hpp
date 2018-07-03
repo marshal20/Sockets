@@ -4,7 +4,7 @@
 #include <ws2def.h>
 #include <ws2tcpip.h>
 
-typedef SOCKET SocketHandle;
+typedef int socklen_t;
 
 class sockImpl
 {
@@ -13,6 +13,6 @@ public:
 	~sockImpl();
 
 	static int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,	struct addrinfo **res);
-	static SocketHandle socket(int af, int type, int protocol);
+	static int socket(int af, int type, int protocol);
 
 };

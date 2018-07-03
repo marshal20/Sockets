@@ -20,7 +20,7 @@ int sockImpl::getaddrinfo(const char *node, const char *service, const struct ad
 	return ::getaddrinfo(node, service, hints, res);
 }
 
-SocketHandle sockImpl::socket(int af, int type, int protocol)
+int sockImpl::socket(int af, int type, int protocol)
 {
 	return ::socket(af, type, protocol);
 }
