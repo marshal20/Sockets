@@ -1,27 +1,28 @@
 #pragma once
+#include <Network/types.hpp>
 #include <string>
 #include <vector>
 
-#if WIN32
-#include <ws2tcpip.h>
-#include <ws2def.h>
-#else if __linux__
-#include <sys/types.h>
-#include <sys/socket.h>
-#endif
-#include <Network/types.hpp>
+struct sockaddr_storage;
+
 
 struct IPv4 {
-	union {
-		struct {
-			unsigned char a, b, c, d;
-		};
-		unsigned int val;
-	};
+	unsigned char a, b, c, d;
 };
 
 struct IPv6 {
 	unsigned short a, b, c, d, e, f, g, h;
+};
+
+struct Addr
+{
+	Protocol type;
+	union
+	{
+		IPv4 v4;
+		IPv6 v6;
+	};
+	unsigned short port;
 };
 
 class Address
@@ -31,10 +32,10 @@ public:
 	~Address();
 
 	unsigned short getPort() const;
-	Address setPort(short value);
+	Address setPort(unsigned short value);
 
-	void setIP(const IPv4& value);
-	void setIP(const IPv6& value);
+	Address setIP(const IPv4& value);
+	Address setIP(const IPv6& value);
 
 	Protocol getProtocol() const;
 
@@ -45,7 +46,12 @@ public:
 	static Address broadcast();
 
 private:
+	friend void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr);
+	friend void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr);
+
+private:
 	friend class Socket;
-	sockaddr_storage m_addr;
+	//sockaddr_storage m_addr;
+	Addr m_addr;
 	bool m_valid = false;
 };

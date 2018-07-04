@@ -5,6 +5,10 @@
 
 int main(int argc, char* argv[])
 {
+	std::cout << Address().setIP(IPv4({ 127,0,0,1 })).getPresentation() << std::endl;
+	std::cout << Address().setIP(IPv6({ 1,2,3,4,5,6,7,8 })).getPresentation() << std::endl;
+	std::cin.get();
+
 	char* port = "3000";
 	if (argc == 2)
 		port = argv[1];
@@ -22,7 +26,7 @@ int main(int argc, char* argv[])
 
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr.getPresentation() << std::endl;
-		
+
 		char buff[1024];
 		int currec;
 		while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
