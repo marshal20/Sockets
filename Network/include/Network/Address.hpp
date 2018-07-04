@@ -1,17 +1,7 @@
 #pragma once
+#include <Network/types.hpp>
 #include <string>
 #include <vector>
-
-/*
-#if WIN32
-#include <ws2tcpip.h>
-#include <ws2def.h>
-#else if __linux__
-#include <sys/types.h>
-#include <sys/socket.h>
-#endif
-*/
-#include <Network/types.hpp>
 
 struct sockaddr_storage;
 

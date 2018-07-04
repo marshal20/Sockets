@@ -2,14 +2,6 @@
 #include "errors.hpp"
 #include "sockImpl.hpp"
 
-#if WIN32
-#include <ws2tcpip.h>
-#include <ws2def.h>
-#else if __linux__
-#include <sys/types.h>
-#include <sys/socket.h>
-#endif
-
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {
 	memset(dst, 0, sizeof(sockaddr_storage));
@@ -29,36 +21,12 @@ Address::~Address()
 unsigned short Address::getPort() const
 {
 	return m_addr.port;
-	/*
-	if (!m_valid) return 0;
-
-	// IPv4
-	if (m_addr.ss_family == AF_INET)
-	{
-		return ntohs(((sockaddr_in*)&m_addr)->sin_port);
-	}
-
-	// IPv6
-	return ntohs(((sockaddr_in6*)&m_addr)->sin6_port);
-	*/
 }
 
 Address Address::setPort(unsigned short value)
 {
 	m_addr.port = value;
 	return *this;
-	/*
-	m_valid = true;
-	// IPv4
-	if (m_addr.ss_family == AF_INET)
-	{
-		((sockaddr_in*)&m_addr)->sin_port = htons(value);
-		return *this;
-	}
-
-	// IPv6
-	((sockaddr_in6*)&m_addr)->sin6_port = htons(value);
-	*/
 }
 
 Address Address::setIP(const IPv4& value)
@@ -67,11 +35,6 @@ Address Address::setIP(const IPv4& value)
 	m_addr.type = Protocol::IPv4;
 	m_addr.v4 = value;
 	return *this;
-	/*
-	m_valid = true;
-	m_addr.ss_family = AF_INET;
-	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
-	*/
 }
 
 Address Address::setIP(const IPv6& value)
@@ -80,27 +43,11 @@ Address Address::setIP(const IPv6& value)
 	m_addr.type = Protocol::IPv6;
 	m_addr.v6 = value;
 	return *this;
-	/*
-	m_valid = true;
-	m_addr.ss_family = AF_INET6;
-	unsigned short conv[8] = { htons(value.a), htons(value.b),
-								htons(value.c), htons(value.d),
-								htons(value.e), htons(value.f),
-								htons(value.g), htons(value.h) };
-	memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
-	*/
 }
 
 Protocol Address::getProtocol() const
 {
 	return m_addr.type;
-	/*
-	// IPv4
-	if (m_addr.ss_family == PF_INET) return Protocol::IPv4;
-
-	// IPv6
-	return Protocol::IPv6;
-	*/
 }
 
 std::string Address::getPresentation() const
@@ -171,27 +118,10 @@ Address Address::localhost()
 {
 	// TODO : test
 	return Address().setIP(IPv4({ 127,0,0,1 }));
-	/*
-	Address temp;
-	struct addrinfo hint, *res;
-	int code;
-	memset(&hint, 0, sizeof(struct addrinfo));
-	hint.ai_family = AF_INET;
-
-	if ((code = sockImpl::getaddrinfo("localhost", NULL, &hint, &res)) != 0)
-		Error::runtime("getaddrinfo failed", gai_strerror(code), code);
-
-	temp.m_valid = true;
-	addrinfoTosockaddrstorage(res, &temp.m_addr);
-	freeaddrinfo(res);
-
-	return temp;
-	*/
 }
 
 Address Address::broadcast()
 {
-	// TODO : test
 	return Address().setIP(IPv4({ 255, 255, 255, 255 }));
 }
 
@@ -233,11 +163,12 @@ void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
 	val.m_addr.type = Protocol::IPv6;
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
 	unsigned short* v6_interm = (unsigned short*)&temp->sin6_addr;
+	// make an array of unsigned short so that we don't worry about endians
 	val.m_addr.v6.a = v6_interm[0]; val.m_addr.v6.b = v6_interm[1];
 	val.m_addr.v6.c = v6_interm[2]; val.m_addr.v6.d = v6_interm[3];
 	val.m_addr.v6.e = v6_interm[4]; val.m_addr.v6.f = v6_interm[5];
 	val.m_addr.v6.g = v6_interm[6]; val.m_addr.v6.h = v6_interm[7];
-	//memcpy(&val.m_addr.v6, v6_interm, sizeof(temp->sin6_addr));
+
 	val.m_addr.port = ntohs(temp->sin6_port);
 }
 
