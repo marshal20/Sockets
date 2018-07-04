@@ -86,22 +86,25 @@ std::string Address::getPresentation() const
 {
 	if (!m_valid) return "Invalid address";
 
+	sockaddr_storage temp_addr;
+	AddressTosockaddr(*this, &temp_addr);
+
 	static const int temp_len = INET6_ADDRSTRLEN;
 	static char temp[temp_len + 1];
 	void* addr;
 
-	if (m_addr.ss_family == AF_INET)
+	if (temp_addr.ss_family == AF_INET)
 	{
-		struct sockaddr_in* ipv4 = (struct sockaddr_in*)&m_addr;
+		struct sockaddr_in* ipv4 = (struct sockaddr_in*)&temp_addr;
 		addr = &(ipv4->sin_addr);
 	}
 	else
 	{
-		struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)&m_addr;
+		struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)&temp_addr;
 		addr = &(ipv6->sin6_addr);
 	}
 
-	inet_ntop(m_addr.ss_family, addr, temp, temp_len);
+	inet_ntop(temp_addr.ss_family, addr, temp, temp_len);
 
 	temp[temp_len] = '\0';
 
@@ -143,6 +146,9 @@ Address Address::fromPresentation(const std::string& rep)
 
 Address Address::localhost()
 {
+	// TODO : test
+	return Address().setIP(IPv4({ 127,0,0,1 }));
+	/*
 	Address temp;
 	struct addrinfo hint, *res;
 	int code;
@@ -157,12 +163,13 @@ Address Address::localhost()
 	freeaddrinfo(res);
 
 	return temp;
+	*/
 }
 
 Address Address::broadcast()
 {
-	// TODO
-	return Address();
+	// TODO : test
+	return Address().setIP(IPv4({ 255, 255, 255, 255 }));
 }
 
 void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
