@@ -7,9 +7,10 @@ int main(int argc, char* argv[])
 {
 	std::cout << Address().setIP(IPv4({ 127,0,0,1 })).getPresentation() << std::endl;
 	std::cout << Address().setIP(IPv6({ 1,2,3,4,5,6,7,8 })).getPresentation() << std::endl;
+	std::cout << Address::broadcast().getPresentation() << std::endl;
 	std::cin.get();
 
-	char* port = "3000";
+	const char* port = "3000";
 	if (argc == 2)
 		port = argv[1];
 
