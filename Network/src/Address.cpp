@@ -190,28 +190,19 @@ void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
 {
 	if (sockaddr->ss_family == PF_INET)
 	{
-
+		val.m_addr.type = Protocol::IPv4;
+		sockaddr_in* temp = (sockaddr_in*)sockaddr;
+		int v4_interm = ntohl(temp->sin_addr.s_addr);
+		memcpy(&val.m_addr.v4, &v4_interm, 4);
+		val.m_addr.port = ntohs(temp->sin_port);
 		return;
 	}
 
 	// IPv6
+	val.m_addr.type = Protocol::IPv6;
+	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
+	unsigned char* v6_interm = (unsigned char*)&temp->sin6_addr;
+	memcpy(&val.m_addr.v6, v6_interm, sizeof(temp->sin6_addr));
+	val.m_addr.port = ntohs(temp->sin6_port);
 }
 
-
-Address Address::setIP(const IPv4& value)
-{
-	m_valid = true;
-	m_addr.ss_family = AF_INET;
-	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
-}
-
-Address Address::setIP(const IPv6& value)
-{
-	m_valid = true;
-	m_addr.ss_family = AF_INET6;
-	unsigned short conv[8] = { htons(value.a), htons(value.b),
-		htons(value.c), htons(value.d),
-		htons(value.e), htons(value.f),
-		htons(value.g), htons(value.h) };
-	memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
-}
