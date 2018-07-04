@@ -28,6 +28,8 @@ Address::~Address()
 
 unsigned short Address::getPort() const
 {
+	return m_addr.port;
+	/*
 	if (!m_valid) return 0;
 
 	// IPv4
@@ -38,10 +40,14 @@ unsigned short Address::getPort() const
 
 	// IPv6
 	return ntohs(((sockaddr_in6*)&m_addr)->sin6_port);
+	*/
 }
 
-Address Address::setPort(short value)
+Address Address::setPort(unsigned short value)
 {
+	m_addr.port = value;
+	return *this;
+	/*
 	m_valid = true;
 	// IPv4
 	if (m_addr.ss_family == AF_INET)
@@ -52,13 +58,14 @@ Address Address::setPort(short value)
 
 	// IPv6
 	((sockaddr_in6*)&m_addr)->sin6_port = htons(value);
-	return *this;
+	*/
 }
 
 Address Address::setIP(const IPv4& value)
 {
 	m_addr.type = Protocol::IPv4;
 	m_addr.v4 = value;
+	return *this;
 	/*
 	m_valid = true;
 	m_addr.ss_family = AF_INET;
@@ -70,6 +77,7 @@ Address Address::setIP(const IPv6& value)
 {
 	m_addr.type = Protocol::IPv6;
 	m_addr.v6 = value;
+	return *this;
 	/*
 	m_valid = true;
 	m_addr.ss_family = AF_INET6;

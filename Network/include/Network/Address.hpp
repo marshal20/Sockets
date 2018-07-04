@@ -42,7 +42,7 @@ public:
 	~Address();
 
 	unsigned short getPort() const;
-	Address setPort(short value);
+	Address setPort(unsigned short value);
 
 	Address setIP(const IPv4& value);
 	Address setIP(const IPv6& value);
