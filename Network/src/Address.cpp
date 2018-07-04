@@ -141,8 +141,8 @@ void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 	// IPv6
 	sockaddr->ss_family = PF_INET6;
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
-	unsigned short v6_interm[8] = { val.m_addr.v6.a, val.m_addr.v6.b, val.m_addr.v6.c,val.m_addr.v6.d,
-		val.m_addr.v6.e,val.m_addr.v6.f,val.m_addr.v6.g,val.m_addr.v6.h };
+	unsigned short v6_interm[8] = { htons(val.m_addr.v6.a), htons(val.m_addr.v6.b), htons(val.m_addr.v6.c), htons(val.m_addr.v6.d),
+		htons(val.m_addr.v6.e), htons(val.m_addr.v6.f), htons(val.m_addr.v6.g), htons(val.m_addr.v6.h) };
 	memcpy(&temp->sin6_addr, v6_interm, sizeof(v6_interm));
 	temp->sin6_port = htons(val.m_addr.port);
 }
@@ -165,10 +165,10 @@ void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
 	unsigned short* v6_interm = (unsigned short*)&temp->sin6_addr;
 	// make an array of unsigned short so that we don't worry about endians
-	val.m_addr.v6.a = v6_interm[0]; val.m_addr.v6.b = v6_interm[1];
-	val.m_addr.v6.c = v6_interm[2]; val.m_addr.v6.d = v6_interm[3];
-	val.m_addr.v6.e = v6_interm[4]; val.m_addr.v6.f = v6_interm[5];
-	val.m_addr.v6.g = v6_interm[6]; val.m_addr.v6.h = v6_interm[7];
+	val.m_addr.v6.a = ntohs(v6_interm[0]); val.m_addr.v6.b = ntohs(v6_interm[1]);
+	val.m_addr.v6.c = ntohs(v6_interm[2]); val.m_addr.v6.d = ntohs(v6_interm[3]);
+	val.m_addr.v6.e = ntohs(v6_interm[4]); val.m_addr.v6.f = ntohs(v6_interm[5]);
+	val.m_addr.v6.g = ntohs(v6_interm[6]); val.m_addr.v6.h = ntohs(v6_interm[7]);
 
 	val.m_addr.port = ntohs(temp->sin6_port);
 }
