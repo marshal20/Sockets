@@ -3,6 +3,9 @@
 #include "sockImpl.hpp"
 #include <string.h>
 
+const Address Address::localhost = Address().setIP(IPv4({ 127, 0, 0, 1 }));;
+const Address Address::broadcast = Address().setIP(IPv4({ 255, 255, 255, 255 }));;
+
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {
 	memset(dst, 0, sizeof(sockaddr_storage));
@@ -120,6 +123,7 @@ Address Address::fromPresentation(const std::string& rep)
 	return fromPresentationAll(rep)[0];
 }
 
+/*
 Address Address::localhost()
 {
 	// TODO : test
@@ -130,6 +134,7 @@ Address Address::broadcast()
 {
 	return Address().setIP(IPv4({ 255, 255, 255, 255 }));
 }
+*/
 
 void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 {
