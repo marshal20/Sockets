@@ -123,19 +123,6 @@ Address Address::fromPresentation(const std::string& rep)
 	return fromPresentationAll(rep)[0];
 }
 
-/*
-Address Address::localhost()
-{
-	// TODO : test
-	return Address().setIP(IPv4({ 127,0,0,1 }));
-}
-
-Address Address::broadcast()
-{
-	return Address().setIP(IPv4({ 255, 255, 255, 255 }));
-}
-*/
-
 void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 {
 	if (val.m_addr.type == Protocol::IPv4)
