@@ -2,6 +2,14 @@
 #include "errors.hpp"
 #include "sockImpl.hpp"
 
+#if WIN32
+#include <ws2tcpip.h>
+#include <ws2def.h>
+#else if __linux__
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {
 	memset(dst, 0, sizeof(sockaddr_storage));
@@ -47,14 +55,14 @@ Address Address::setPort(short value)
 	return *this;
 }
 
-void Address::setIP(const IPv4& value)
+Address Address::setIP(const IPv4& value)
 {
 	m_valid = true;
 	m_addr.ss_family = AF_INET;
 	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
 }
 
-void Address::setIP(const IPv6& value)
+Address Address::setIP(const IPv6& value)
 {
 m_valid = true;
 m_addr.ss_family = AF_INET6;
@@ -157,3 +165,53 @@ Address Address::broadcast()
 	return Address();
 }
 
+void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
+{
+	if (val.m_addr.type == Protocol::IPv4)
+	{
+		sockaddr->ss_family = PF_INET;
+		sockaddr_in* temp = (sockaddr_in*)sockaddr;
+		unsigned char v4_interm[4] = { val.m_addr.v4.a, val.m_addr.v4.b, val.m_addr.v4.c, val.m_addr.v4.d };
+		memcpy(&temp->sin_addr, v4_interm, sizeof(v4_interm));
+		temp->sin_port = htons(val.m_addr.port);
+		return;
+	}
+
+	// IPv6
+	sockaddr->ss_family = PF_INET6;
+	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
+	unsigned char v6_interm[16] = { val.m_addr.v6.a, val.m_addr.v6.b, val.m_addr.v6.c,val.m_addr.v6.d,
+		val.m_addr.v6.e,val.m_addr.v6.f,val.m_addr.v6.g,val.m_addr.v6.h };
+	memcpy(&temp->sin6_addr, v6_interm, sizeof(v6_interm));
+	temp->sin6_port = htons(val.m_addr.port);
+}
+
+void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
+{
+	if (sockaddr->ss_family == PF_INET)
+	{
+
+		return;
+	}
+
+	// IPv6
+}
+
+
+Address Address::setIP(const IPv4& value)
+{
+	m_valid = true;
+	m_addr.ss_family = AF_INET;
+	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
+}
+
+Address Address::setIP(const IPv6& value)
+{
+	m_valid = true;
+	m_addr.ss_family = AF_INET6;
+	unsigned short conv[8] = { htons(value.a), htons(value.b),
+		htons(value.c), htons(value.d),
+		htons(value.e), htons(value.f),
+		htons(value.g), htons(value.h) };
+	memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
+}
