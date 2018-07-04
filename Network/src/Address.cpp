@@ -1,6 +1,7 @@
 #include "Network/Address.hpp"
 #include "errors.hpp"
 #include "sockImpl.hpp"
+#include <string.h>
 
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {

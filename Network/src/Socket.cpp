@@ -3,6 +3,7 @@
 #include "sockImpl.hpp"
 #include <sys/types.h>
 #include <errno.h>
+#include <string.h>
 
 Socket::Socket(Type type, Protocol family)
 {
