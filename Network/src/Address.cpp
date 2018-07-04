@@ -57,29 +57,40 @@ Address Address::setPort(short value)
 
 Address Address::setIP(const IPv4& value)
 {
+	m_addr.type = Protocol::IPv4;
+	m_addr.v4 = value;
+	/*
 	m_valid = true;
 	m_addr.ss_family = AF_INET;
 	((sockaddr_in*)&m_addr)->sin_addr.s_addr = htonl(value.val);
+	*/
 }
 
 Address Address::setIP(const IPv6& value)
 {
-m_valid = true;
-m_addr.ss_family = AF_INET6;
-unsigned short conv[8] = { htons(value.a), htons(value.b),
-							htons(value.c), htons(value.d),
-							htons(value.e), htons(value.f),
-							htons(value.g), htons(value.h) };
-memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
+	m_addr.type = Protocol::IPv6;
+	m_addr.v6 = value;
+	/*
+	m_valid = true;
+	m_addr.ss_family = AF_INET6;
+	unsigned short conv[8] = { htons(value.a), htons(value.b),
+								htons(value.c), htons(value.d),
+								htons(value.e), htons(value.f),
+								htons(value.g), htons(value.h) };
+	memcpy(&(((sockaddr_in6*)&m_addr)->sin6_addr), conv, sizeof(conv));
+	*/
 }
 
 Protocol Address::getProtocol() const
 {
+	return m_addr.type;
+	/*
 	// IPv4
 	if (m_addr.ss_family == PF_INET) return Protocol::IPv4;
 
 	// IPv6
 	return Protocol::IPv6;
+	*/
 }
 
 std::string Address::getPresentation() const
