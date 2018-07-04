@@ -19,6 +19,11 @@ Address::~Address()
 {
 }
 
+std::ostream& operator<<(std::ostream& os, const Address& addr)
+{
+	return os << addr.getPresentation();
+}
+
 unsigned short Address::getPort() const
 {
 	return m_addr.port;

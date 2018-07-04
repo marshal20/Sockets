@@ -2,6 +2,7 @@
 #include <Network/types.hpp>
 #include <string>
 #include <vector>
+#include <iostream>
 
 struct sockaddr_storage;
 
@@ -30,6 +31,8 @@ class Address
 public:
 	Address();
 	~Address();
+
+	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
 	unsigned short getPort() const;
 	Address setPort(unsigned short value);
