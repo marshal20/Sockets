@@ -210,7 +210,7 @@ void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 	// IPv6
 	sockaddr->ss_family = PF_INET6;
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
-	unsigned char v6_interm[16] = { val.m_addr.v6.a, val.m_addr.v6.b, val.m_addr.v6.c,val.m_addr.v6.d,
+	unsigned short v6_interm[8] = { val.m_addr.v6.a, val.m_addr.v6.b, val.m_addr.v6.c,val.m_addr.v6.d,
 		val.m_addr.v6.e,val.m_addr.v6.f,val.m_addr.v6.g,val.m_addr.v6.h };
 	memcpy(&temp->sin6_addr, v6_interm, sizeof(v6_interm));
 	temp->sin6_port = htons(val.m_addr.port);
@@ -222,8 +222,9 @@ void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
 	{
 		val.m_addr.type = Protocol::IPv4;
 		sockaddr_in* temp = (sockaddr_in*)sockaddr;
-		int v4_interm = ntohl(temp->sin_addr.s_addr);
-		memcpy(&val.m_addr.v4, &v4_interm, 4);
+		unsigned char* v4_interm = (unsigned char*)&temp->sin_addr;
+		val.m_addr.v4.a = v4_interm[0]; val.m_addr.v4.b = v4_interm[1];
+		val.m_addr.v4.c = v4_interm[2]; val.m_addr.v4.d = v4_interm[3];
 		val.m_addr.port = ntohs(temp->sin_port);
 		return;
 	}
@@ -231,8 +232,12 @@ void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr)
 	// IPv6
 	val.m_addr.type = Protocol::IPv6;
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
-	unsigned char* v6_interm = (unsigned char*)&temp->sin6_addr;
-	memcpy(&val.m_addr.v6, v6_interm, sizeof(temp->sin6_addr));
+	unsigned short* v6_interm = (unsigned short*)&temp->sin6_addr;
+	val.m_addr.v6.a = v6_interm[0]; val.m_addr.v6.b = v6_interm[1];
+	val.m_addr.v6.c = v6_interm[2]; val.m_addr.v6.d = v6_interm[3];
+	val.m_addr.v6.e = v6_interm[4]; val.m_addr.v6.f = v6_interm[5];
+	val.m_addr.v6.g = v6_interm[6]; val.m_addr.v6.h = v6_interm[7];
+	//memcpy(&val.m_addr.v6, v6_interm, sizeof(temp->sin6_addr));
 	val.m_addr.port = ntohs(temp->sin6_port);
 }
 

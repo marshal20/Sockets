@@ -23,8 +23,10 @@ Socket::~Socket()
 
 void Socket::bind(const Address& addr)
 {
-	int len = (addr.getProtocol() == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-	if (::bind(m_sock, (const sockaddr*)&(addr.m_addr), len) == -1)
+	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	sockaddr_storage temp_sockaddr_storage;
+	AddressTosockaddr(addr, &temp_sockaddr_storage);
+	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
 		Error::runtime("Bind failed", errno);
 }
 
@@ -40,9 +42,11 @@ std::tuple<Socket, Address> Socket::accept()
 	Address addr;
 	addr.m_valid = true;
 	int len = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&addr.m_addr, (socklen_t*)&len)) == -1)
+	sockaddr_storage temp_sockaddr_storage;
+	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
 		Error::runtime("accept failed", errno);
 
+	sockaddrToAddress(addr, &temp_sockaddr_storage);
 	return std::make_tuple(sock, addr);
 }
 
