@@ -51,7 +51,6 @@ private:
 
 private:
 	friend class Socket;
-	//sockaddr_storage m_addr;
 	Addr m_addr;
 	bool m_valid = false;
 };
