@@ -63,6 +63,7 @@ Address Address::setPort(unsigned short value)
 
 Address Address::setIP(const IPv4& value)
 {
+	m_valid = true;
 	m_addr.type = Protocol::IPv4;
 	m_addr.v4 = value;
 	return *this;
@@ -75,6 +76,7 @@ Address Address::setIP(const IPv4& value)
 
 Address Address::setIP(const IPv6& value)
 {
+	m_valid = true;
 	m_addr.type = Protocol::IPv6;
 	m_addr.v6 = value;
 	return *this;
@@ -148,7 +150,9 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 	for (it = res; it != NULL; it = it->ai_next)
 	{
 		Address temp;
-		addrinfoTosockaddrstorage(it, &temp.m_addr);
+		sockaddr_storage temp_sockaddr_storage;
+		addrinfoTosockaddrstorage(it, &temp_sockaddr_storage);
+		sockaddrToAddress(temp, &temp_sockaddr_storage);
 		temp.m_valid = true;
 		addrs.push_back(temp);
 	}
