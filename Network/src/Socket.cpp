@@ -18,10 +18,8 @@ Socket::Socket(Type type, Protocol family) :
 
 Socket::~Socket()
 {
-	/*
-	if (closesocket(m_sock) == -1)
-		Error::runtime("closesocket failed", m_sock);
-	*/
+	if (::close(m_sock) == -1)
+		Error::runtime("close failed", m_sock);
 }
 
 void Socket::close()
