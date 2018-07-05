@@ -10,14 +10,14 @@ public:
 	enum class Type
 	{
 		Stream = 1,
-		Dgram,
-		DgramBroadcast
+		Dgram
 	};
 
 	Socket(Type type = Type::Stream, Protocol family = Protocol::IPv4);
 	~Socket();
 
 	void close();
+	void beBroadcast();
 
 	void connect(const Address& addr);
 	void bind(const Address& addr);

@@ -10,8 +10,8 @@ Socket::Socket(Type type, Protocol family) :
 {
 	int af = (family == Protocol::IPv4) ? PF_INET : PF_INET6;
 	int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
-	int flags = (type == Type::DgramBroadcast) ? SO_BROADCAST : 0;
-	m_sock = sockImpl::socket(af, t, flags);
+
+	m_sock = sockImpl::socket(af, t, 0);
 	if (m_sock == -1)
 		Error::runtime("Invalid socket", m_sock);
 }
@@ -28,6 +28,15 @@ void Socket::close()
 {
 	if (::close(m_sock) == -1)
 		Error::runtime("close failed", errno);
+}
+
+void Socket::beBroadcast()
+{
+	if (m_type != Type::Dgram) Error::runtime("can't make a stream socket broadcast");
+
+	int broadcast = 1;
+	if (setsockopt(m_sock, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) == -1)
+		Error::runtime("setsockopt failed to set socket to broadcast", errno);
 }
 
 void Socket::connect(const Address& addr)
