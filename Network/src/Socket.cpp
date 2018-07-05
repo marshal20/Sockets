@@ -91,9 +91,9 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 	if(m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
 
 	int recvd;
-	int len = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len_addr = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
-	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, &len)) == -1)
+	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, &len_addr)) == -1)
 		Error::runtime("recvfrom failed", errno);
 
 	sockaddrToAddress(sender, &temp_sockaddr_storage);
@@ -104,12 +104,12 @@ int Socket::sendto(const void* buff, int len, const Address& target)
 {
 	if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 
-	int len = (target.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len_addr = (target.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(target, &temp_sockaddr_storage);
 
 	int sent;
-	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len)) == -1)
+	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)
 		Error::runtime("sendto failed", errno);
 
 	m_monitor.sent += sent;
