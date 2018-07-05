@@ -13,9 +13,8 @@ int main(int argc, char* argv[])
 	localhostTarget.setPort(std::stoi(port));
 
 	Socket sock(Socket::Type::Dgram);
-
 	sock.bind(localhostTarget);
-	sock.listen();
+
 	Address remoteaddr;
 	char buff[1025];
 	int recvd;

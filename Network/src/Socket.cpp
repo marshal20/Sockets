@@ -5,7 +5,8 @@
 #include <errno.h>
 #include <string.h>
 
-Socket::Socket(Type type, Protocol family)
+Socket::Socket(Type type, Protocol family) :
+	m_type(type), m_protocol(family)
 {
 	int af = (family == Protocol::IPv4) ? PF_INET : PF_INET6;
 	int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
