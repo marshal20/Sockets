@@ -28,6 +28,15 @@ void Socket::close()
 		Error::runtime("close failed", errno);
 }
 
+void Socket::connect(const Address& addr)
+{
+	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	sockaddr_storage temp_sockaddr_storage;
+	AddressTosockaddr(addr, &temp_sockaddr_storage);
+	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
+		Error::runtime("connect failed", errno);
+}
+
 void Socket::bind(const Address& addr)
 {
 	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);

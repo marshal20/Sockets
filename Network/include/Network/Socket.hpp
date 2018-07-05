@@ -18,6 +18,7 @@ public:
 
 	void close();
 
+	void connect(const Address& addr);
 	void bind(const Address& addr);
 	void listen(int prelog = 10);
 	std::tuple<Socket, Address> accept();
