@@ -14,6 +14,7 @@ int main(int argc, char* argv[])
 
 	Socket sock(Socket::Type::Dgram);
 	sock.bind(localhostTarget);
+	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << localhostTarget.getPort() << std::endl;
 
 	Address remoteaddr;
 	char buff[1025];
