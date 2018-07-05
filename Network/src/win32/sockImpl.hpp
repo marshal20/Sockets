@@ -6,7 +6,7 @@
 
 typedef int socklen_t;
 
-int close(int sock);
+extern int close(int sock);
 
 class sockImpl
 {

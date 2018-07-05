@@ -23,6 +23,8 @@ public:
 	std::tuple<Socket, Address> accept();
 	int recv(void* buff, int len);
 	int send(const void* buff, int len);
+	int recvfrom(void* buff, int len, Address& sender);
+	int sendto(const void* buff, int len, const Address& target);
 
 	int getTotalrecv() const;
 	int getTotalsent() const;
