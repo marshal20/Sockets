@@ -26,7 +26,7 @@ Socket::~Socket()
 
 void Socket::close()
 {
-	if (::closesocket(m_sock) == -1)
+	if (::close(m_sock) == -1)
 		Error::runtime("close failed", errno);
 }
 
