@@ -10,7 +10,8 @@ Socket::Socket(Type type, Protocol family) :
 {
 	int af = (family == Protocol::IPv4) ? PF_INET : PF_INET6;
 	int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
-	m_sock = sockImpl::socket(af, t, 0);
+	int flags = (type == Type::DgramBroadcast) ? SO_BROADCAST : 0;
+	m_sock = sockImpl::socket(af, t, flags);
 	if (m_sock == -1)
 		Error::runtime("Invalid socket", m_sock);
 }

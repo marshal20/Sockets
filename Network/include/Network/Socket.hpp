@@ -10,7 +10,8 @@ public:
 	enum class Type
 	{
 		Stream = 1,
-		Dgram
+		Dgram,
+		DgramBroadcast
 	};
 
 	Socket(Type type = Type::Stream, Protocol family = Protocol::IPv4);
