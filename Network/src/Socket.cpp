@@ -22,6 +22,12 @@ Socket::~Socket()
 	*/
 }
 
+void Socket::close()
+{
+	if (::close(m_sock) == -1)
+		Error::runtime("close failed", errno);
+}
+
 void Socket::bind(const Address& addr)
 {
 	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);

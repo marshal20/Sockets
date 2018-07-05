@@ -16,6 +16,8 @@ public:
 	Socket(Type type = Type::Stream, Protocol family = Protocol::IPv4);
 	~Socket();
 
+	void close();
+
 	void bind(const Address& addr);
 	void listen(int prelog = 10);
 	std::tuple<Socket, Address> accept();

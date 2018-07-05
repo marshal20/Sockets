@@ -6,6 +6,8 @@
 
 typedef int socklen_t;
 
+int close(int sock);
+
 class sockImpl
 {
 public:
