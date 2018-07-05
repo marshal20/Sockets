@@ -26,7 +26,7 @@ Socket::~Socket()
 
 void Socket::close()
 {
-	if (::close(m_sock) == -1)
+	if (::closesocket(m_sock) == -1)
 		Error::runtime("close failed", errno);
 }
 
@@ -104,7 +104,7 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 	int recvd;
 	int len_addr = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
-	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, &len_addr)) == -1)
+	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
 		Error::runtime("recvfrom failed", errno);
 
 	sockaddrToAddress(sender, &temp_sockaddr_storage);
