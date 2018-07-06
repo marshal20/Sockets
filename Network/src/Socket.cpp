@@ -106,6 +106,8 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 		Error::runtime("recvfrom failed", errno);
 
 	sockaddrToAddress(sender, &temp_sockaddr_storage);
+	sender.m_valid = true;
+
 	return recvd;
 }
 
