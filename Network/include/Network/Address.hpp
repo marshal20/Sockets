@@ -32,9 +32,6 @@ public:
 	Address();
 	~Address();
 
-	//static const Address localhost;
-	//static const Address broadcast;
-
 	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
 	unsigned short getPort() const;

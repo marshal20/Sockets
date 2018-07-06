@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 	if (argc == 2)
 		port = argv[2];
 
-	Address localhostTarget = Address::localhost;
+	Address localhostTarget = Address::thishost();
 	localhostTarget.setPort(std::stoi(port));
 
 	Socket sock(Socket::Type::Dgram);
