@@ -3,8 +3,8 @@
 #include "sockImpl.hpp"
 #include <string.h>
 
-const Address Address::localhost = Address().setIP(IPv4({ 127, 0, 0, 1 }));;
-const Address Address::broadcast = Address().setIP(IPv4({ 255, 255, 255, 255 }));;
+//const Address Address::localhost = Address().setIP(IPv4({ 127, 0, 0, 1 }));;
+//const Address Address::broadcast = Address().setIP(IPv4({ 255, 255, 255, 255 }));;
 
 void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 {
@@ -121,6 +121,45 @@ std::vector<Address> Address::fromPresentationAll(const std::string& rep)
 Address Address::fromPresentation(const std::string& rep)
 {
 	return fromPresentationAll(rep)[0];
+}
+
+Address Address::localhost()
+{
+	return fromNetworkInt(INADDR_LOOPBACK);
+}
+
+Address Address::thishost()
+{
+	return fromNetworkInt(INADDR_ANY);
+	/*struct addrinfo hints, *servinfo;	int rv;
+
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_PASSIVE; // use my IP
+	if ((rv = getaddrinfo(NULL, "5000", &hints, &servinfo)) != 0)
+		Error::runtime("getaddrinfo failed", gai_strerror(rv), rv);	Address temp;
+	sockaddr_storage temp_sockaddr_storage;
+	addrinfoTosockaddrstorage(servinfo, &temp_sockaddr_storage);
+	sockaddrToAddress(temp, &temp_sockaddr_storage);
+	temp.m_valid = true;	freeaddrinfo(servinfo);
+
+	return temp;
+	*/
+}
+
+Address Address::broadcast()
+{
+	return fromNetworkInt(INADDR_BROADCAST);
+}
+
+Address Address::fromNetworkInt(int val)
+{
+	Address temp;
+	temp.m_valid = true;
+	*(int*)&temp.m_addr.v4 = ntohl(val);
+	temp.m_addr.type = Protocol::IPv4;
+	return temp;
 }
 
 void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)

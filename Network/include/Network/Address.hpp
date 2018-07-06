@@ -32,8 +32,8 @@ public:
 	Address();
 	~Address();
 
-	static const Address localhost;
-	static const Address broadcast;
+	//static const Address localhost;
+	//static const Address broadcast;
 
 	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
@@ -48,6 +48,12 @@ public:
 	std::string getPresentation() const;
 	static std::vector<Address> fromPresentationAll(const std::string& rep);
 	static Address fromPresentation(const std::string& rep);
+	static Address localhost();
+	static Address thishost();
+	static Address broadcast();
+
+private:
+	static Address fromNetworkInt(int val);
 
 private:
 	friend void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr);
