@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 		port = argv[1];
 
 	Socket sock;
-	Address localhostTarget = Address::localhost;
+	Address localhostTarget = Address::thishost();
 	localhostTarget.setPort(std::stoi(port));
 	sock.bind(localhostTarget);
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
