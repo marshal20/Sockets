@@ -10,13 +10,14 @@ int main(int argc, char* argv[])
 	if (argc > 1)
 		port = argv[1];
 
-	Protocol addrProtocol = Protocol::IPv4;
+	Protocol addrProtocol = Protocol::IPv6;
 	if (argc > 2)
 		if (argv[2][0] == '6')
 			addrProtocol = Protocol::IPv6;
 
 	Address localhostTarget = Address::thishost(addrProtocol).setPort(std::stoi(port));
 	Socket sock(Socket::Type::Dgram, localhostTarget.getProtocol());
+	std::cout << localhostTarget << std::endl;
 
 	sock.bind(localhostTarget);
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << localhostTarget.getPort() << std::endl;

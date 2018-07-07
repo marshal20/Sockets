@@ -10,17 +10,6 @@ void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 	memcpy(dst, src->ai_addr, struct_size);
 }
 
-Address Address::Addressfromin6addr(const struct in6_addr* in6addr)
-{
-	Address temp;
-	sockaddr_in6 temp_addr6;
-	memset(&temp_addr6, 0, sizeof(temp_addr6));
-	temp_addr6.sin6_family = PF_INET6;
-	memcpy(&temp_addr6.sin6_addr, in6addr, sizeof(in6_addr));
-	sockaddrToAddress(temp, (const sockaddr_storage*)&temp);
-	return temp;
-}
-
 Address::Address()
 {
 
@@ -158,6 +147,18 @@ Address Address::fromNetworkInt(int val)
 	temp.m_valid = true;
 	*(int*)&temp.m_addr.v4 = ntohl(val);
 	temp.m_addr.type = Protocol::IPv4;
+	return temp;
+}
+
+Address Address::Addressfromin6addr(const struct in6_addr* in6addr)
+{
+	Address temp;
+	temp.m_valid = true;
+	sockaddr_in6 temp_addr6;
+	memset(&temp_addr6, 0, sizeof(temp_addr6));
+	temp_addr6.sin6_family = PF_INET6;
+	memcpy(&temp_addr6.sin6_addr, in6addr, sizeof(in6_addr));
+	sockaddrToAddress(temp, (const sockaddr_storage*)&temp_addr6);
 	return temp;
 }
 

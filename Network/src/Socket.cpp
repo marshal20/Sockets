@@ -14,6 +14,13 @@ Socket::Socket(Type type, Protocol family) :
 	m_sock = sockImpl::socket(af, t, 0);
 	if (m_sock == -1)
 		Error::runtime("Invalid socket", m_sock);
+
+	{
+		int on = 1;
+		if (family == Protocol::IPv6) {
+			setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&on, sizeof(on));
+		}
+	}
 }
 
 Socket::~Socket()
