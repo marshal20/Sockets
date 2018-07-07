@@ -13,13 +13,13 @@ Socket::Socket(Type type, Protocol family) :
 
 	m_sock = sockImpl::socket(af, t, 0);
 	if (m_sock == -1)
-		Error::runtime("Invalid socket", m_sock);
+		Error::runtime("Invalid socket", strerror(errno), errno);
 
-	{
-		int on = 1;
-		if (family == Protocol::IPv6) {
-			setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&on, sizeof(on));
-		}
+	// set the socket to IPv6 only
+	if (family == Protocol::IPv6) {
+		int IPv6on = 1;
+		if (setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&IPv6on, sizeof(IPv6on)) == -1)
+			Error::runtime("setsockopt failed", strerror(errno), errno);
 	}
 }
 
@@ -36,7 +36,7 @@ void Socket::close()
 {
 	if (m_sock == -1) return;
 	if (::close(m_sock) == -1)
-		Error::runtime("close failed", errno);
+		Error::runtime("close failed", strerror(errno), errno);
 }
 
 void Socket::beBroadcast()
@@ -45,7 +45,7 @@ void Socket::beBroadcast()
 
 	int broadcast = 1;
 	if (setsockopt(m_sock, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) == -1)
-		Error::runtime("setsockopt failed to set socket to broadcast", errno);
+		Error::runtime("setsockopt failed to set socket to broadcast", strerror(errno), errno);
 }
 
 void Socket::connect(const Address& addr)
@@ -54,7 +54,7 @@ void Socket::connect(const Address& addr)
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(addr, &temp_sockaddr_storage);
 	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
-		Error::runtime("connect failed", errno);
+		Error::runtime("connect failed", strerror(errno), errno);
 }
 
 void Socket::bind(const Address& addr)
@@ -63,13 +63,13 @@ void Socket::bind(const Address& addr)
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(addr, &temp_sockaddr_storage);
 	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
-		Error::runtime("Bind failed", errno);
+		Error::runtime("Bind failed", strerror(errno), errno);
 }
 
 void Socket::listen(int prelog)
 {
 	if (::listen(m_sock, prelog) == -1)
-		Error::runtime("listen failed", errno);
+		Error::runtime("listen failed", strerror(errno), errno);
 }
 
 Socket Socket::accept(Address& remoteAddr)
@@ -79,7 +79,7 @@ Socket Socket::accept(Address& remoteAddr)
 	int len = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
-		Error::runtime("accept failed", errno);
+		Error::runtime("accept failed", strerror(errno), errno);
 
 	sockaddrToAddress(remoteAddr, &temp_sockaddr_storage);
 	return sock;
@@ -89,7 +89,7 @@ int Socket::recv(void* buff, int len)
 {
 	int recieved;
 	if((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
-		Error::runtime("recv failed", errno);
+		Error::runtime("recv failed", strerror(errno), errno);
 
 	m_monitor.recv += recieved;
 	return recieved;
@@ -99,7 +99,7 @@ int Socket::send(const void* buff, int len)
 {
 	int sent;
 	if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
-		Error::runtime("send failed", errno);
+		Error::runtime("send failed", strerror(errno), errno);
 
 	m_monitor.sent += sent;
 	return sent;
@@ -113,7 +113,7 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 	int len_addr = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
-		Error::runtime("recvfrom failed", errno);
+		Error::runtime("recvfrom failed", strerror(errno), errno);
 
 	sockaddrToAddress(sender, &temp_sockaddr_storage);
 	sender.m_valid = true;
@@ -131,7 +131,7 @@ int Socket::sendto(const void* buff, int len, const Address& target)
 
 	int sent;
 	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)
-		Error::runtime("sendto failed", errno);
+		Error::runtime("sendto failed", strerror(errno), errno);
 
 	m_monitor.sent += sent;
 	return sent;
