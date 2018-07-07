@@ -14,17 +14,16 @@ int main(int argc, char* argv[])
 	if (argc == 3)
 		port = argv[2];
 
-	Address localhostTarget = Address::fromPresentation(domainname);
-	localhostTarget.setPort(std::stoi(port));
+	Address remoteTarget = Address::fromPresentation(domainname).setPort(std::stoi(port));
 
-	Socket sock(Socket::Type::Dgram);
+	Socket sock(Socket::Type::Dgram, remoteTarget.getProtocol());
 	sock.beBroadcast();
 
 	char buff[1025];
 	while (std::cin.getline(buff, sizeof(buff)))
 	{
-		sock.sendto(buff, strlen(buff) + 1, localhostTarget);
-		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << localhostTarget << ", buff: " << buff << std::endl;
+		sock.sendto(buff, strlen(buff) + 1, remoteTarget);
+		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << remoteTarget << ", buff: " << buff << std::endl;
 	}
 
 	return 0;
