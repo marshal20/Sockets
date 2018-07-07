@@ -7,10 +7,15 @@
 int main(int argc, char* argv[])
 {
 	const char* port = "2000";
-	if (argc == 2)
-		port = argv[2];
+	if (argc > 1)
+		port = argv[1];
 
-	Address localhostTarget = Address::thishost().setPort(std::stoi(port));
+	Protocol addrProtocol = Protocol::IPv4;
+	if (argc > 2)
+		if (argv[2][0] == '6')
+			addrProtocol = Protocol::IPv6;
+
+	Address localhostTarget = Address::thishost(addrProtocol).setPort(std::stoi(port));
 	Socket sock(Socket::Type::Dgram, localhostTarget.getProtocol());
 
 	sock.bind(localhostTarget);

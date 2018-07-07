@@ -26,5 +26,6 @@ int main(int argc, char* argv[])
 		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << remoteTarget << ", buff: " << buff << std::endl;
 	}
 
+	sock.close();
 	return 0;
 }
