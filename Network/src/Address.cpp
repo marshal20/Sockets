@@ -151,6 +151,7 @@ void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 		sockaddr->ss_family = PF_INET;
 		sockaddr_in* temp = (sockaddr_in*)sockaddr;
 		unsigned char v4_interm[4] = { val.m_addr.v4.a, val.m_addr.v4.b, val.m_addr.v4.c, val.m_addr.v4.d };
+		memset(&temp->sin_addr, 0, sizeof(sockaddr_in));
 		memcpy(&temp->sin_addr, v4_interm, sizeof(v4_interm));
 		temp->sin_port = htons(val.m_addr.port);
 		return;
@@ -161,6 +162,7 @@ void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr)
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
 	unsigned short v6_interm[8] = { htons(val.m_addr.v6.a), htons(val.m_addr.v6.b), htons(val.m_addr.v6.c), htons(val.m_addr.v6.d),
 		htons(val.m_addr.v6.e), htons(val.m_addr.v6.f), htons(val.m_addr.v6.g), htons(val.m_addr.v6.h) };
+	memset(&temp->sin6_addr, 0, sizeof(sockaddr_in6));
 	memcpy(&temp->sin6_addr, v6_interm, sizeof(v6_interm));
 	temp->sin6_port = htons(val.m_addr.port);
 }
