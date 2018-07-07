@@ -14,13 +14,6 @@ Socket::Socket(Type type, Protocol family) :
 	m_sock = sockImpl::socket(af, t, 0);
 	if (m_sock == -1)
 		Error::runtime("Invalid socket", strerror(errno), errno);
-
-	// set the socket to IPv6 only
-	if (family == Protocol::IPv6) {
-		int IPv6on = 1;
-		if (setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&IPv6on, sizeof(IPv6on)) == -1)
-			Error::runtime("setsockopt failed", strerror(errno), errno);
-	}
 }
 
 Socket::~Socket()
