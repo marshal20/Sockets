@@ -32,5 +32,6 @@ int main(int argc, char* argv[])
 			new_sock.getTotalrecv(), new_sock.getTotalsent());
 	}
 
+	sock.close();
 	return 0;
 }

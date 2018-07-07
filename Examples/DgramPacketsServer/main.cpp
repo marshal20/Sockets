@@ -27,6 +27,6 @@ int main(int argc, char* argv[])
 		sock.sendto(buff, recvd, remoteaddr);
 	}
 
-
+	sock.close();
 	return 0;
 }
