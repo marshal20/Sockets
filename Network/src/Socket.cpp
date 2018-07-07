@@ -18,12 +18,16 @@ Socket::Socket(Type type, Protocol family) :
 
 Socket::~Socket()
 {
-	if (::close(m_sock) == -1)
-		Error::runtime("close failed", m_sock);
+}
+
+Socket::operator bool() const
+{
+	return (m_sock == -1) ? false : true;
 }
 
 void Socket::close()
 {
+	if (m_sock == -1) return;
 	if (::close(m_sock) == -1)
 		Error::runtime("close failed", errno);
 }
@@ -61,18 +65,17 @@ void Socket::listen(int prelog)
 		Error::runtime("listen failed", errno);
 }
 
-std::tuple<Socket, Address> Socket::accept()
+Socket Socket::accept(Address& remoteAddr)
 {
 	Socket sock;
-	Address addr;
-	addr.m_valid = true;
+	remoteAddr.m_valid = true;
 	int len = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
 		Error::runtime("accept failed", errno);
 
-	sockaddrToAddress(addr, &temp_sockaddr_storage);
-	return std::make_tuple(sock, addr);
+	sockaddrToAddress(remoteAddr, &temp_sockaddr_storage);
+	return sock;
 }
 
 int Socket::recv(void* buff, int len)
