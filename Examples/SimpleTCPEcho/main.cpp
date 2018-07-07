@@ -9,8 +9,9 @@ int main(int argc, char* argv[])
 	if (argc == 2)
 		port = argv[1];
 
-	Socket sock;
 	Address localhostTarget = Address::thishost().setPort(std::stoi(port)); // thishost:port
+	Socket sock(Socket::Type::Stream, localhostTarget.getProtocol());
+
 	sock.bind(localhostTarget);
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	sock.listen();
