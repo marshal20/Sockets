@@ -9,7 +9,12 @@ int main(int argc, char* argv[])
 	if (argc == 2)
 		port = argv[1];
 
-	Address localhostTarget = Address::thishost().setPort(std::stoi(port)); // thishost:port
+	Protocol addrProtocol = Protocol::IPv4;
+	if (argc > 2)
+		if (argv[2][0] == '6')
+			addrProtocol = Protocol::IPv6;
+
+	Address localhostTarget = Address::thishost(addrProtocol).setPort(std::stoi(port)); // thishost:port
 	Socket sock(Socket::Type::Stream, localhostTarget.getProtocol());
 
 	sock.bind(localhostTarget);
