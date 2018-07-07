@@ -45,12 +45,13 @@ public:
 	std::string getPresentation() const;
 	static std::vector<Address> fromPresentationAll(const std::string& rep);
 	static Address fromPresentation(const std::string& rep);
-	static Address localhost();
-	static Address thishost();
+	static Address localhost(Protocol IPversion = Protocol::IPv4);
+	static Address thishost(Protocol IPversion = Protocol::IPv4);
 	static Address broadcast();
 
 private:
 	static Address fromNetworkInt(int val);
+	static Address Addressfromin6addr(const struct in6_addr* in6addr);
 
 private:
 	friend void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr);

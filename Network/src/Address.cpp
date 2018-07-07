@@ -10,6 +10,17 @@ void addrinfoTosockaddrstorage(const addrinfo* src, sockaddr_storage* dst)
 	memcpy(dst, src->ai_addr, struct_size);
 }
 
+Address Address::Addressfromin6addr(const struct in6_addr* in6addr)
+{
+	Address temp;
+	sockaddr_in6 temp_addr6;
+	memset(&temp_addr6, 0, sizeof(temp_addr6));
+	temp_addr6.sin6_family = PF_INET6;
+	memcpy(&temp_addr6.sin6_addr, in6addr, sizeof(in6_addr));
+	sockaddrToAddress(temp, (const sockaddr_storage*)&temp);
+	return temp;
+}
+
 Address::Address()
 {
 
@@ -120,14 +131,20 @@ Address Address::fromPresentation(const std::string& rep)
 	return fromPresentationAll(rep)[0];
 }
 
-Address Address::localhost()
+Address Address::localhost(Protocol IPversion)
 {
-	return fromNetworkInt(INADDR_LOOPBACK);
+	if(IPversion == Protocol::IPv4)
+		return fromNetworkInt(INADDR_LOOPBACK);
+
+	return Addressfromin6addr(&in6addr_loopback);
 }
 
-Address Address::thishost()
+Address Address::thishost(Protocol IPversion)
 {
-	return fromNetworkInt(INADDR_ANY);
+	if (IPversion == Protocol::IPv4)
+		return fromNetworkInt(INADDR_ANY);
+
+	return Addressfromin6addr(&in6addr_any);
 }
 
 Address Address::broadcast()
