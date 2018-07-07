@@ -10,17 +10,14 @@ int main(int argc, char* argv[])
 		port = argv[1];
 
 	Socket sock;
-	Address localhostTarget = Address::thishost();
-	localhostTarget.setPort(std::stoi(port));
+	Address localhostTarget = Address::thishost().setPort(std::stoi(port)); // thishost:port
 	sock.bind(localhostTarget);
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	sock.listen();
-	Socket new_sock;
-	Address new_addr;
-	while (true)
-	{
-		std::tie(new_sock, new_addr) = sock.accept();
 
+	Socket new_sock; Address new_addr;
+	while (new_sock = sock.accept(new_addr))
+	{
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
 
