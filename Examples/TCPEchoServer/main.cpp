@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
 	const char* port = "3000";
 	if (argc == 2)
@@ -40,4 +40,8 @@ int main(int argc, char* argv[])
 
 	sock.close();
 	return 0;
+}
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
 }

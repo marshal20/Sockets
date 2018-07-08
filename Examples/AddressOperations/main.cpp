@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
 	std::cout << "IPv4 test: " << Address().setIP(IPv4({ 1,2,3,4 })) << std::endl;
 	std::cout << "IPv6 test: " << Address().setIP(IPv6({ 1,2,3,4,5,6,7,8 })) << std::endl;
@@ -17,4 +17,8 @@ int main(int argc, char* argv[])
 	std::cout << "example.com: " << Address::fromPresentation("example.com") << std::endl;
 
 	return 0;
+}
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
 }

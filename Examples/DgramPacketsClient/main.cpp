@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
 	const char* domainname = "127.0.0.1";
 	if (argc > 1)
@@ -28,4 +28,8 @@ int main(int argc, char* argv[])
 
 	sock.close();
 	return 0;
+}
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
 }
