@@ -5,14 +5,17 @@
 #include <errno.h>
 #include <string.h>
 
+int get_protocol_length(Protocol prot) {
+	return (prot == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+}
+
 Socket::Socket(Type type, Protocol family) :
 	m_type(type), m_protocol(family)
 {
 	int af = (family == Protocol::IPv4) ? PF_INET : PF_INET6;
 	int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
 
-	m_sock = sockImpl::socket(af, t, 0);
-	if (m_sock == -1)
+	if ((m_sock = sockImpl::socket(af, t, 0)) == -1)
 		Error::runtime("Invalid socket", strerror(errno), errno);
 }
 
@@ -43,7 +46,7 @@ void Socket::beBroadcast()
 
 void Socket::connect(const Address& addr)
 {
-	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len = get_protocol_length(addr.m_addr.type);
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(addr, &temp_sockaddr_storage);
 	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
@@ -52,7 +55,7 @@ void Socket::connect(const Address& addr)
 
 void Socket::bind(const Address& addr)
 {
-	int len = (addr.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len = get_protocol_length(addr.m_addr.type);
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(addr, &temp_sockaddr_storage);
 	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
@@ -69,7 +72,7 @@ Socket Socket::accept(Address& remoteAddr)
 {
 	Socket sock;
 	remoteAddr.m_valid = true;
-	int len = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len = get_protocol_length(m_protocol);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
 		Error::runtime("accept failed", strerror(errno), errno);
@@ -103,7 +106,7 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 	if(m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
 
 	int recvd;
-	int len_addr = (m_protocol == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len_addr = get_protocol_length(m_protocol);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
 		Error::runtime("recvfrom failed", strerror(errno), errno);
@@ -118,7 +121,7 @@ int Socket::sendto(const void* buff, int len, const Address& target)
 {
 	if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 
-	int len_addr = (target.m_addr.type == Protocol::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	int len_addr = get_protocol_length(target.m_addr.type);
 	sockaddr_storage temp_sockaddr_storage;
 	AddressTosockaddr(target, &temp_sockaddr_storage);
 
