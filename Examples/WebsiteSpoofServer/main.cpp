@@ -4,6 +4,20 @@
 #include <string>
 #include <sstream>
 
+std::vector<std::string> splitString(std::string strToSplit, char del)
+{
+	std::vector<std::string> temp;
+	std::stringstream strStream;
+	strStream << strToSplit;
+	std::string chunk;
+	while (std::getline(strStream, chunk, del))
+	{
+		temp.push_back(chunk);
+	}
+
+	return temp;
+}
+
 void serveClient(Socket client_sock)
 {
 
