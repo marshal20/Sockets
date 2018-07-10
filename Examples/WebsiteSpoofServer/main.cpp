@@ -40,7 +40,10 @@ void replaceHost(std::string& request, const std::string& new_host)
 	for (auto& s : reqstrs)
 	{
 		if (s.find("Host") != std::string::npos)
+		{
 			s = std::string("Host: ") + new_host;
+			break;
+		}
 	}
 	request = "";
 	for (auto& s : reqstrs)
@@ -50,7 +53,7 @@ void replaceHost(std::string& request, const std::string& new_host)
 
 void serveClient(Socket client_sock)
 {
-	char buff[4096];
+	char buff[8192];
 	int currec;
 
 	Socket server_sock;
