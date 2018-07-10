@@ -50,7 +50,7 @@ void replaceHost(std::string& request, const std::string& new_host)
 
 void serveClient(Socket client_sock)
 {
-	char buff[9000];
+	char buff[4096];
 	int currec;
 
 	Socket server_sock;
@@ -63,29 +63,23 @@ void serveClient(Socket client_sock)
 
 		currec = client_sock.recv(buff, sizeof(buff));
 		if (currec == 0) close = true;
+		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
 
 		buff[currec] = 0;
 		std::string request = buff;
-
-		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
 
 		std::string myHost = getHost(request);
 		replaceHost(request, website);
 
 		send = server_sock.send(request.c_str(), request.length());
 		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
-		std::cout << std::endl << request << std::endl;
+
 		currec = server_sock.recv(buff, sizeof(buff));
 		if (currec == 0) close = true;
-
-		buff[currec] = 0;
 		std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
 
-		//send = new_sock.send(buff, currec);
 		send = client_sock.send(buff, currec);
 		std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
-
-		std::cout << std::endl << buff << std::endl;
 
 		std::cout << "----- RequestServed -----\n\n";
 	}
