@@ -151,58 +151,6 @@ int main(int argc, char* argv[]) try
 
 		threadList.emplace_back(serveConnection, new_sock);
 	}
-	if (false)
-	{
-		// new connection
-		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
-
-		char buff[8192];
-		int currec;
-
-		currec = new_sock.recv(buff, sizeof(buff));
-		buff[currec] = 0;
-		std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl;
-
-		ConnectRequest req = parseRequest(buff);
-		Address toConnect = getAddressFromDomain(req.domainName);
-		std::cout << "- Connect address: " << toConnect << ", port:" << toConnect.getPort() << std::endl;
-		Socket targetSock;
-		targetSock.connect(toConnect);
-
-
-		/*//new_sock.send(HTTP_200_OK, strlen(HTTP_200_OK));
-		targetSock.send(buff, currec);
-		std::cout << "- send " << currec << " Bytes, content: " << buff << std::endl;
-		currec = targetSock.recv(buff, sizeof(buff));
-		std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl;
-		new_sock.send(buff, currec);
-		std::cout << "- sent " << currec << " Bytes, content: " << buff << std::endl;*/
-		//std::string res = req.connectStr + " " + req.domainName + " " + req.protocol + " 200 OK\r\n";
-		std::string res = req.protocol + " 200 ok\r\n\r\n";
-		std::cout << new_sock.send(res.c_str(), strlen(res.c_str())) << std::endl;
-		std::cout << "res: " << res << std::endl;
-
-		int send;
-		while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
-		{
-			std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
-			
-			//send = targetSock.send(buff, currec);
-			send = sendall(targetSock, buff, currec);
-			std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
-			currec = targetSock.recv(buff, sizeof(buff));
-			std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
-
-			//send = new_sock.send(buff, currec);
-			send = sendall(new_sock, buff, currec);
-			std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
-
-			std::cout << "----- RequestServed -----\n\n";
-		}
-
-		printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
-			new_sock.getTotalrecv(), new_sock.getTotalsent());
-	}
 
 	for (auto& t : threadList)
 	{
