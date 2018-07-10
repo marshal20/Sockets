@@ -6,7 +6,7 @@
 
 // global constants
 const char* port = "8080";
-const char* website = "bigclive.com";
+const char* website = "example.com";
 
 std::vector<std::string> splitString(std::string strToSplit, char del)
 {
