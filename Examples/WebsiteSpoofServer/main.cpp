@@ -62,8 +62,9 @@ void serveClient(Socket client_sock)
 		int send;
 
 		currec = client_sock.recv(buff, sizeof(buff));
-		if (currec == 0) close = true;
-		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
+		if (currec == 0) { close = true; continue; }
+		std::cout << "\n----- RequestStarted -----\n";
+		std::cout << "- Recieved from client " << currec << " Bytes" << std::endl;
 
 		buff[currec] = 0;
 		std::string request = buff;
@@ -72,18 +73,19 @@ void serveClient(Socket client_sock)
 		replaceHost(request, website);
 
 		send = server_sock.send(request.c_str(), request.length());
-		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
+		std::cout << "- Sent to website " << send << " Bytes" << std::endl;
 
 		currec = server_sock.recv(buff, sizeof(buff));
 		if (currec == 0) close = true;
-		std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
+		std::cout << "- Recieved from website " << currec << " Bytes" << std::endl;
 
 		send = client_sock.send(buff, currec);
-		std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
+		std::cout << "- Sent to client " << send << " Bytes" << std::endl;
 
-		std::cout << "----- RequestServed -----\n\n";
+		std::cout << "----- RequestServed -----\n";
 	}
 
+	server_sock.close();
 }
 
 int main(int argc, char* argv[]) try
@@ -102,12 +104,12 @@ int main(int argc, char* argv[]) try
 	std::cout << "- Server will spoof: " << website << std::endl;
 	sock.listen();
 
-	Socket new_sock; Address new_addr;
-	while (new_sock = sock.accept(new_addr))
+	Socket client_sock; Address new_addr;
+	while (client_sock = sock.accept(new_addr))
 	{
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
-		serveClient(new_sock);
+		serveClient(client_sock);
 	}
 
 	sock.close();
