@@ -72,10 +72,74 @@ int sendall(Socket& s, char *buf, int len)
 	return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 
+void connectionRecieve(Socket new_sock, Socket targetSock, char* buffr, int& currecr)
+{
+	while (currecr = new_sock.recv(buffr, sizeof(buffr)) != 0)
+	{
+		std::cout << "- Recieved new_sock " << currecr << " Bytes" << std::endl;
+		int send = sendall(targetSock, buffr, currecr);
+		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
+	}
+}
+
+void connectionSend(Socket new_sock, Socket targetSock, char* buffs, int& currecs)
+{
+	while (currecs = targetSock.recv(buffs, sizeof(buffs)) != 0)
+	{
+		std::cout << "- Recieved targetSock " << currecs << " Bytes" << std::endl;
+		int send = sendall(new_sock, buffs, currecs);
+		std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
+	}
+}
+
 int serveConnection(Socket new_sock)
 {
-	char buff[8192];
+	char buff[9000];
 	int currec;
+
+	Socket googleServer;
+	googleServer.connect(Address::fromPresentation("bigclive.com").setPort(80));
+
+	int send;
+	while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
+	{
+		buff[currec] = 0;
+		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
+
+		
+
+		//send = targetSock.send(buff, currec);
+		auto reqstrs = splitString(buff, '\n');
+		for (auto& s : reqstrs)
+		{
+			if (s.find("Host") != std::string::npos)
+				s = "Host: bigclive.com";
+		}
+		std::string googleReq = "";
+		for (auto& s : reqstrs)
+			googleReq += s + "\n";
+		googleReq += "\r\n";
+		send = googleServer.send(googleReq.c_str(), strlen(googleReq.c_str()));
+		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
+		std::cout << std::endl << googleReq << std::endl;
+		currec = googleServer.recv(buff, sizeof(buff));
+		buff[currec] = 0;
+		std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
+
+		//send = new_sock.send(buff, currec);
+		send = sendall(new_sock, buff, currec);
+		std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
+
+		std::cout << std::endl << buff << std::endl;
+
+		std::cout << "----- RequestServed -----\n\n";
+	}
+
+	return 0;
+
+	//////////////////////////////
+
+
 
 	currec = new_sock.recv(buff, sizeof(buff));
 	buff[currec] = 0;
@@ -101,7 +165,16 @@ int serveConnection(Socket new_sock)
 	std::cout << new_sock.send(res.c_str(), strlen(res.c_str())) << std::endl;
 	std::cout << "res: " << res << std::endl;
 
-	int send;
+	//char buffr[9000];
+	//int currecr;
+	//char buffs[9000];
+	//int currecs;
+	//std::thread recv(connectionRecieve, new_sock, targetSock, buffr, currecr);
+
+	//std::thread send(connectionSend, new_sock, targetSock, buffs, currecs);
+	//send.join();
+
+	//int send;
 	while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
 	{
 		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
@@ -111,6 +184,7 @@ int serveConnection(Socket new_sock)
 		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
 		currec = targetSock.recv(buff, sizeof(buff));
 		std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
+		std::cout << buff << std::endl;
 
 		//send = new_sock.send(buff, currec);
 		send = sendall(new_sock, buff, currec);
@@ -125,7 +199,7 @@ int serveConnection(Socket new_sock)
 
 int main(int argc, char* argv[]) try
 {
-	const char* port = "4000";
+	const char* port = "80";
 	if (argc == 2)
 		port = argv[1];
 
@@ -142,20 +216,14 @@ int main(int argc, char* argv[]) try
 	sock.listen();
 
 	Socket new_sock; Address new_addr;
-	std::vector<std::thread> threadList;
-	threadList.reserve(16);
 	while (new_sock = sock.accept(new_addr))
 	{
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
 
-		threadList.emplace_back(serveConnection, new_sock);
+		serveConnection(new_sock);
 	}
 
-	for (auto& t : threadList)
-	{
-		t.join();
-	}
 	sock.close();
 	return 0;
 }
