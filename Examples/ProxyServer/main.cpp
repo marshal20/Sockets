@@ -27,8 +27,9 @@ struct ConnectRequest
 	std::string protocol;
 };
 
-ConnectRequest parseRequest(std::string req)
+ConnectRequest parseRequest(const std::string& req)
 {
+	//std::string firstLine = splitString(req, '\r')[0];
 	std::regex Connectregex("(\\S+)\\s+(\\S+)\\s+(\\S+)");
 	std::smatch matchs;
 	std::regex_search(req, matchs, Connectregex);
@@ -59,34 +60,33 @@ int sendall(Socket& s, char *buf, int len)
 	return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 
-int serveClient(Socket client_sock)
+void serveClient(Socket client_sock) try
 {
-	char buff[8192];
+	char buff[16384*2];
 	int currec;
 
 	currec = client_sock.recv(buff, sizeof(buff));
 	buff[currec] = 0;
-	std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl;
+	std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl << std::endl;
 
-	ConnectRequest req;
+	ConnectRequest req = parseRequest(buff);
+	Address toConnect;
 	Socket targetSock;
-	try
-	{
-		req = parseRequest(buff);
-		Address toConnect = getAddressFromDomain(req.domainName);
-		std::cout << "- Connect address: " << toConnect << ", port:" << toConnect.getPort() << std::endl;
-		targetSock.connect(toConnect);
-	}
-	catch (const std::exception& e)
+
+	if (!req.valid)
 	{
 		std::string res = req.protocol + " 403 forbidden\r\n\r\n";
-		return 0;
+		client_sock.send(res.c_str(), res.length());
+		return;
 	}
 
+	toConnect = getAddressFromDomain(req.domainName);
+	targetSock.connect(toConnect);
+	std::cout << "- Connected to address: " << toConnect << ", port:" << toConnect.getPort() << std::endl;
 
 	std::string res = req.protocol + " 200 ok\r\n\r\n";
-	std::cout << client_sock.send(res.c_str(), strlen(res.c_str())) << std::endl;
-	std::cout << "res: " << res << std::endl;
+	client_sock.send(res.c_str(), res.length());
+	std::cout << "proxy res: \n" << res << std::endl;
 
 
 
@@ -112,10 +112,15 @@ int serveClient(Socket client_sock)
 	printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
 		client_sock.getTotalrecv(), client_sock.getTotalsent());
 }
+catch (const std::exception& e)
+{
+	std::cout << "- Failed client: " << e.what() << std::endl;
+	return;
+}
 
 int main(int argc, char* argv[]) try
 {
-	const char* port = "80";
+	const char* port = "5000";
 	if (argc == 2)
 		port = argv[1];
 
