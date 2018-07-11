@@ -45,21 +45,6 @@ Address getAddressFromDomain(std::string domainName)
 	return Address::fromPresentation(addrportList[0]).setPort(std::stoi(addrportList[1]));
 }
 
-int sendall(Socket& s, char *buf, int len)
-{
-	int total = 0; // how many bytes we've sent
-	int bytesleft = len; // how many we have left to send
-	int n;
-	while (total < len) {
-		n = s.send(buf + total, bytesleft);
-		if (n == -1) { break; }
-		total += n;
-		bytesleft -= n;
-	}
-	return total; // return number actually sent here
-	return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
-}
-
 void serveClient(Socket client_sock) try
 {
 	char buff[16384*2];
@@ -71,7 +56,7 @@ void serveClient(Socket client_sock) try
 
 	ConnectRequest req = parseRequest(buff);
 	Address toConnect;
-	Socket targetSock;
+	Socket server_sock;
 
 	if (!req.valid)
 	{
@@ -81,33 +66,38 @@ void serveClient(Socket client_sock) try
 	}
 
 	toConnect = getAddressFromDomain(req.domainName);
-	targetSock.connect(toConnect);
+	server_sock.connect(toConnect);
 	std::cout << "- Connected to address: " << toConnect << ", port:" << toConnect.getPort() << std::endl;
 
 	std::string res = req.protocol + " 200 ok\r\n\r\n";
 	client_sock.send(res.c_str(), res.length());
 	std::cout << "proxy res: \n" << res << std::endl;
 
-
-
 	int send;
-	while ((currec = client_sock.recv(buff, sizeof(buff))) != 0)
+	bool close = false;
+	while (!close)
 	{
+		currec = client_sock.recv(buff, sizeof(buff));
+		if (currec == 0) { close = true; continue; }
 		std::cout << "- Recieved new_sock " << currec << " Bytes" << std::endl;
 
 		//send = targetSock.send(buff, currec);
-		send = sendall(targetSock, buff, currec);
+		send = server_sock.send(buff, currec);
 		std::cout << "- sent targetSock " << send << " Bytes" << std::endl;
-		currec = targetSock.recv(buff, sizeof(buff));
+
+		currec = server_sock.recv(buff, sizeof(buff));
+		if (currec == 0) close = true;
 		std::cout << "- Recieved targetSock " << currec << " Bytes" << std::endl;
 		std::cout << buff << std::endl;
 
 		//send = new_sock.send(buff, currec);
-		send = sendall(client_sock, buff, currec);
+		send = client_sock.send(buff, currec);
 		std::cout << "- sent new_sock " << send << " Bytes" << std::endl;
 
 		std::cout << "----- RequestServed -----\n\n";
 	}
+
+	server_sock.close();
 
 	printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
 		client_sock.getTotalrecv(), client_sock.getTotalsent());
