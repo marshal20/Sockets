@@ -3,10 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <thread>
-
-const char* HTTP_200_OK = " 200 OK";
-const char* HTTP_403_FORBIDDEN= "\nHTTP/1.1 403 FORBIDDEN";
+#include <regex>
 
 std::vector<std::string> splitString(std::string strToSplit, char del)
 {
@@ -22,24 +19,9 @@ std::vector<std::string> splitString(std::string strToSplit, char del)
 	return temp;
 }
 
-/*Address getConnectAddress(std::string line)
-{
-	std::string addrAndport = splitString(line, ' ')[1];
-	auto addrportList = splitString(addrAndport, ':');
-	return Address::fromPresentation(addrportList[0]).setPort(std::stoi(addrportList[1]));
-}
-
-std::string getFirstLine(const char* buff)
-{
-	std::stringstream buffStream;
-	buffStream << buff;
-	std::string firstLine;
-	std::getline(buffStream, firstLine);
-	return firstLine;
-}*/
-
 struct ConnectRequest
 {
+	bool valid;
 	std::string connectStr;
 	std::string domainName;
 	std::string protocol;
@@ -47,8 +29,13 @@ struct ConnectRequest
 
 ConnectRequest parseRequest(std::string req)
 {
-	auto firstLineParts = splitString(splitString(req, '\r')[0], ' ');
-	return { firstLineParts[0], firstLineParts[1], firstLineParts[2] };
+	std::regex Connectregex("(\\S+)\\s+(\\S+)\\s+(\\S+)");
+	std::smatch matchs;
+	std::regex_search(req, matchs, Connectregex);
+	if (matchs.size() == 4)
+		return { true, matchs[1], matchs[2] , matchs[3] };
+
+	return { false, "", "", "" };
 }
 
 Address getAddressFromDomain(std::string domainName)
