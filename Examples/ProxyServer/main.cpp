@@ -45,43 +45,39 @@ Address getAddressFromDomain(std::string domainName)
 	return Address::fromPresentation(addrportList[0]).setPort(std::stoi(addrportList[1]));
 }
 
-void connectCommand(char* buff, int currec)
+std::string getHost(const std::string& request)
 {
+	std::string host = "";
+	std::regex Hostregex("Host\\s*:\\s*(\\S+)");
+	std::smatch matchs;
+	
 
+	auto reqstrs = splitString(request, '\n');
+	for (const auto& s : reqstrs)
+	{
+		if (s.find("Host") != std::string::npos)
+		{
+			std::regex_search(request, matchs, Hostregex);
+			if (matchs.size() == 2)
+				host = matchs[1];
+		}
+			//host = splitString(s, ':')[1];
+	}
+	return host;
 }
 
-void getCommand(char* buff, int currec)
+void connectCommand(Socket client_sock, char* buff, int currec)
 {
-
-}
-
-void serveClient(Socket client_sock) try
-{
-	char buff[16384*2];
-	int currec;
-
-	currec = client_sock.recv(buff, sizeof(buff));
-	buff[currec] = 0;
-	std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl << std::endl;
-
-	ConnectRequest req = parseRequest(buff);
-	if (req.connectStr == "CONNECT")
-	{
-		connectCommand(buff, currec);
-	}
-	else
-	{
-		getCommand(buff, currec);
-	}
-
-
 	Address toConnect;
 	Socket server_sock;
+
+	ConnectRequest req = parseRequest(buff);
 
 	if (!req.valid)
 	{
 		std::string res = req.protocol + " 403 forbidden\r\n\r\n";
 		client_sock.send(res.c_str(), res.length());
+		client_sock.close();
 		return;
 	}
 
@@ -91,7 +87,7 @@ void serveClient(Socket client_sock) try
 
 	std::string res = req.protocol + " 200 ok\r\n\r\n";
 	client_sock.send(res.c_str(), res.length());
-	std::cout << "proxy res: \n" << res << std::endl;
+	std::cout << "proxy res: " << res << std::endl;
 
 	int send;
 	bool close = false;
@@ -118,6 +114,61 @@ void serveClient(Socket client_sock) try
 	}
 
 	server_sock.close();
+}
+
+void getCommand(Socket client_sock, char* buff, int currec)
+{
+	std::string website = getHost(buff);
+	Socket server_sock;
+	server_sock.connect(Address::fromPresentation(website).setPort(80));
+
+	bool close = false;
+	while (!close)
+	{
+		int send;
+		if (currec == 0) { close = true; continue; }
+
+		send = server_sock.send(buff, currec);
+		std::cout << "- Sent to website " << send << " Bytes" << std::endl;
+
+		currec = server_sock.recv(buff, sizeof(buff));
+		if (currec == 0) close = true;
+		std::cout << "- Recieved from website " << currec << " Bytes" << std::endl;
+
+		send = client_sock.send(buff, currec);
+		std::cout << "- Sent to client " << send << " Bytes" << std::endl;
+
+		currec = client_sock.recv(buff, sizeof(buff));
+
+		std::cout << "----- RequestServed -----\n";
+
+		std::cout << "\n----- RequestStarted -----\n";
+		std::cout << "- Recieved from client " << currec << " Bytes" << std::endl;
+	}
+
+	server_sock.close();
+}
+
+void serveClient(Socket client_sock) try
+{
+	char buff[16384*2];
+	int currec;
+
+	currec = client_sock.recv(buff, sizeof(buff));
+	buff[currec] = 0;
+	std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl << std::endl;
+
+	ConnectRequest req = parseRequest(buff);
+	if (req.connectStr == "CONNECT")
+	{
+		std::cout << "----------------- CONNECT" << std::endl;
+		connectCommand(client_sock, buff, currec);
+	}
+	else
+	{
+		std::cout << "----------------- GET" << std::endl;
+		getCommand(client_sock, buff, currec);
+	}
 
 	printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
 		client_sock.getTotalrecv(), client_sock.getTotalsent());
