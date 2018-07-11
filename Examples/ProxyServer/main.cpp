@@ -45,6 +45,16 @@ Address getAddressFromDomain(std::string domainName)
 	return Address::fromPresentation(addrportList[0]).setPort(std::stoi(addrportList[1]));
 }
 
+void connectCommand(char* buff, int currec)
+{
+
+}
+
+void getCommand(char* buff, int currec)
+{
+
+}
+
 void serveClient(Socket client_sock) try
 {
 	char buff[16384*2];
@@ -55,6 +65,16 @@ void serveClient(Socket client_sock) try
 	std::cout << "- Recieved " << currec << " Bytes, content: " << buff << std::endl << std::endl;
 
 	ConnectRequest req = parseRequest(buff);
+	if (req.connectStr == "CONNECT")
+	{
+		connectCommand(buff, currec);
+	}
+	else
+	{
+		getCommand(buff, currec);
+	}
+
+
 	Address toConnect;
 	Socket server_sock;
 
