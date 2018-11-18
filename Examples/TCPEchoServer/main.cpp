@@ -9,20 +9,20 @@ int main(int argc, char* argv[]) try
 	if (argc == 2)
 		port = argv[1];
 
-	Protocol addrProtocol = Protocol::IPv4;
+	Family addrProtocol = Family::IPv4;
 	if (argc > 2)
 		if (argv[2][0] == '6')
-			addrProtocol = Protocol::IPv6;
+			addrProtocol = Family::IPv6;
 
-	Address localhostTarget = Address::thishost(addrProtocol).setPort(std::stoi(port)); // thishost:port
-	Socket sock(Socket::Type::Stream, localhostTarget.getProtocol());
+	Address localhostTarget = Address::thishost(addrProtocol); // thishost:port
+	Socket sock(Socket::Type::Stream, localhostTarget.getFamily());
 
-	sock.bind(localhostTarget);
+	sock.bind(localhostTarget, std::stoi(port));
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	sock.listen();
 
-	Socket new_sock; Address new_addr;
-	while (new_sock = sock.accept(new_addr))
+	Socket new_sock; Address new_addr; unsigned short new_port;
+	while (new_sock = sock.accept(new_addr, new_port))
 	{
 		// new connection
 		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
