@@ -44,15 +44,13 @@ public:
 	static Address broadcast();
 
 private:
-	friend Address create_address_from_ipv4addr(int val);
-	friend Address create_address_from_ipv6addr(const struct in6_addr* in6addr);
-
-	friend void create_sockaddr_from_address(const Address& address, unsigned short port, struct sockaddr_storage* sockaddr);
-	friend void create_address_from_sockaddr(Address& address, unsigned short& port, const struct sockaddr_storage* sockaddr);
+	friend Address create_address_from_ipv4addr(int);
+	friend Address create_address_from_ipv6addr(const struct in6_addr*);
+	friend void create_sockaddr_from_address(const Address&, unsigned short, struct sockaddr_storage*);
+	friend void create_address_from_sockaddr(Address&, unsigned short&, const struct sockaddr_storage*);
 
 private:
 	friend class Socket;
 	Addr m_addr;
 	bool m_valid = false;
 };
-

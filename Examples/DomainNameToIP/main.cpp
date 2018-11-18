@@ -1,5 +1,5 @@
+#include <Network/Network.hpp>
 #include <iostream>
-#include <Network/Address.hpp>
 
 int main(int argc, char* argv[]) try
 {

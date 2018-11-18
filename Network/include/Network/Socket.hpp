@@ -1,5 +1,6 @@
 #pragma once
 #include <Network/Address.hpp>
+#include <Network/EndPoint.hpp>
 #include <Network/types.hpp>
 #include <utility>
 
@@ -13,7 +14,6 @@ public:
 	};
 
 	Socket(Type type = Type::Stream, Family family = Family::IPv4);
-	Socket(Socket&& other);
 	~Socket();
 
 	operator bool() const;
@@ -21,14 +21,14 @@ public:
 	void close();
 	void beBroadcast();
 
-	void connect(const Address& addr, unsigned short port);
-	void bind(const Address& addr, unsigned short port);
+	void connect(const EndPoint& endpoint);
+	void bind(const EndPoint& endpoint);
 	void listen(int prelog = 10);
-	Socket accept(Address& remoteAddr, unsigned short& remotePort);
+	std::pair<Socket, EndPoint> accept();
 	int recv(void* buff, int len);
 	int send(const void* buff, int len);
-	int recvfrom(void* buff, int len, Address& sender, unsigned short& port);
-	int sendto(const void* buff, int len, const Address& target, unsigned short port);
+	std::pair<int, EndPoint> recvfrom(void* buff, int len);
+	int sendto(const void* buff, int len, const EndPoint& endpoint);
 
 	int getTotalrecv() const;
 	int getTotalsent() const;

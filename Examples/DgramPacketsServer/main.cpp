@@ -1,6 +1,6 @@
-#include <Network/Address.hpp>
-#include <Network/Socket.hpp>
+#include <Network/Network.hpp>
 #include <iostream>
+#include <tuple>
 #include <stdio.h>
 #include <string.h>
 
@@ -18,18 +18,20 @@ int main(int argc, char* argv[]) try
 	Address localhostTarget = Address::thishost(addrProtocol);
 	Socket sock(Socket::Type::Dgram, localhostTarget.getFamily());
 
-	sock.bind(localhostTarget, std::stoi(port));
+	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << std::stoi(port) << std::endl;
 
-	Address remoteaddr;
-	unsigned short remoteport;
+	EndPoint remote;
 	char buff[1025];
 	int recvd;
-	while ((recvd = sock.recvfrom(buff, sizeof(buff) - 1, remoteaddr, remoteport)) != 0)
+	while (true)
 	{
+		std::tie(recvd, remote) = sock.recvfrom(buff, sizeof(buff) - 1);
+		if (recvd == 0) break;
+
 		buff[recvd] = 0;
-		std::cout << "- Recieved " << recvd << " Bytes, from: " << remoteaddr << ", buff: " <<  buff << std::endl;
-		sock.sendto(buff, recvd, remoteaddr, remoteport);
+		std::cout << "- Recieved " << recvd << " Bytes, from: " << remote.address << ", buff: " <<  buff << std::endl;
+		sock.sendto(buff, recvd, remote);
 	}
 
 	sock.close();

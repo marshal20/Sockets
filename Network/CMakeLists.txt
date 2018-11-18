@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 3.1)
 
 set(SRC 
+		include/Network/Network.hpp
 		src/Address.cpp 
 		include/Network/Address.hpp
 		src/Socket.cpp 
 		include/Network/Socket.hpp
+		include/Network/EndPoint.hpp
 		src/sockImpl.hpp
 		src/util.cpp
 		src/util.hpp

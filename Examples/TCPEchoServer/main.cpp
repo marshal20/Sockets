@@ -1,7 +1,7 @@
-#include <Network/Address.hpp>
-#include <Network/Socket.hpp>
+#include <Network/Network.hpp>
 #include <iostream>
 #include <string>
+#include <tuple>
 
 int main(int argc, char* argv[]) try
 {
@@ -17,15 +17,17 @@ int main(int argc, char* argv[]) try
 	Address localhostTarget = Address::thishost(addrProtocol); // thishost:port
 	Socket sock(Socket::Type::Stream, localhostTarget.getFamily());
 
-	sock.bind(localhostTarget, std::stoi(port));
+	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	sock.listen();
 
-	Socket new_sock; Address new_addr; unsigned short new_port;
-	while (new_sock = sock.accept(new_addr, new_port))
+	Socket new_sock; EndPoint new_endpoint;
+	while (true)
 	{
+		std::tie(new_sock, new_endpoint) = sock.accept();
+
 		// new connection
-		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
+		std::cout << "- Info: new connection, Address: " << new_endpoint.address << std::endl;
 
 		char buff[1024];
 		int currec;
