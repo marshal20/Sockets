@@ -9,8 +9,4 @@ struct EndPoint
 {
 	Address address;
 	unsigned short port;
-
-	/*inline EndPoint(Address addr_, unsigned short port_) :
-		address(addr_), port(port_)
-	{}*/
 };
