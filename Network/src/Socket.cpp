@@ -19,20 +19,14 @@ Socket::Socket(Type type, Family family) :
 		Error::runtime("socket failed", errno);
 }
 
-Socket::Socket(Socket&& other)
-{
-	m_sock = other.m_sock;
-	m_type = other.m_type;
-	m_family = other.m_family;
-	m_monitor = other.m_monitor;
-
-	other.m_sock = -1;
-}
-
 Socket::~Socket()
 {
 	// TODO: Remove debug string.
 	std::cout << "dtor " << this << ": " << m_sock << std::endl;
+
+	if (m_sock == -1) return;
+	if (::close(m_sock) == -1)
+		Error::runtime("close failed", errno);
 }
 
 Socket::operator bool() const
@@ -56,20 +50,20 @@ void Socket::beBroadcast()
 		Error::runtime("setsockopt failed to set socket to broadcast", errno);
 }
 
-void Socket::connect(const Address& addr, unsigned short port)
+void Socket::connect(const EndPoint& endpoint)
 {
-	int len = get_protocol_length(addr.m_addr.family);
+	int len = get_protocol_length(endpoint.address.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(addr, port, &temp_sockaddr_storage);
+	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
 	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
 		Error::runtime("connect failed", errno);
 }
 
-void Socket::bind(const Address& addr, unsigned short port)
+void Socket::bind(const EndPoint& endpoint)
 {
-	int len = get_protocol_length(addr.m_addr.family);
+	int len = get_protocol_length(endpoint.address.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(addr, port, &temp_sockaddr_storage);
+	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
 	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
 		Error::runtime("Bind failed", errno);
 }
@@ -80,17 +74,21 @@ void Socket::listen(int prelog)
 		Error::runtime("listen failed", errno);
 }
 
-Socket Socket::accept(Address& remoteAddr, unsigned short& remotePort)
+std::pair<Socket, EndPoint> Socket::accept()
 {
 	Socket sock;
-	remoteAddr.m_valid = true;
+	Address addr;
+	unsigned short port;
+
+	addr.m_valid = true;
 	int len = get_protocol_length(m_family);
 	sockaddr_storage temp_sockaddr_storage;
 	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
 		Error::runtime("accept failed", errno);
 
-	create_address_from_sockaddr(remoteAddr, remotePort, &temp_sockaddr_storage);
-	return sock;
+	create_address_from_sockaddr(addr, port, &temp_sockaddr_storage);
+
+	return std::make_pair(sock, EndPoint({ addr, port }));
 }
 
 int Socket::recv(void* buff, int len)
@@ -113,8 +111,11 @@ int Socket::send(const void* buff, int len)
 	return sent;
 }
 
-int Socket::recvfrom(void* buff, int len, Address& sender, unsigned short& port)
+std::pair<int, EndPoint> Socket::recvfrom(void* buff, int len)
 {
+	Address sender;
+	unsigned short port;
+
 	if(m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
 
 	int recvd;
@@ -125,17 +126,17 @@ int Socket::recvfrom(void* buff, int len, Address& sender, unsigned short& port)
 
 	create_address_from_sockaddr(sender, port, &temp_sockaddr_storage);
 	sender.m_valid = true;
-
-	return recvd;
+	
+	return std::make_pair(recvd, EndPoint({ sender, port }));
 }
 
-int Socket::sendto(const void* buff, int len, const Address& target, unsigned short port)
+int Socket::sendto(const void* buff, int len, const EndPoint& endpoint)
 {
 	if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 
-	int len_addr = get_protocol_length(target.m_addr.family);
+	int len_addr = get_protocol_length(endpoint.address.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(target,port, &temp_sockaddr_storage);
+	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
 
 	int sent;
 	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)

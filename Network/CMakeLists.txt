@@ -5,6 +5,7 @@ set(SRC
 		include/Network/Address.hpp
 		src/Socket.cpp 
 		include/Network/Socket.hpp
+		include/Network/EndPoint.hpp
 		src/sockImpl.hpp
 		src/util.cpp
 		src/util.hpp
