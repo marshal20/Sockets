@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) try
 	std::vector<Address> addrs = Address::fromPresentationAll(domainName);
 	std::cout << "Addresses(" << addrs.size() << ") for " << domainName << ":" << std::endl;
 	for (auto addr : addrs)
-		std::cout << ProtocolToString(addr.getProtocol()) << ": " << addr.getPresentation() << std::endl;
+		std::cout << ProtocolToString(addr.getFamily()) << ": " << addr.getPresentation() << std::endl;
 
 	return 0;
 }
