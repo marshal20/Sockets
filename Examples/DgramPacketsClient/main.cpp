@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) try
 	char buff[1025];
 	while (std::cin.getline(buff, sizeof(buff)))
 	{
-		sock.sendto(buff, strlen(buff) + 1, { remoteTarget, std::stoi(port) });
+		sock.sendto(buff, strlen(buff) + 1, { remoteTarget, (unsigned short)std::stoi(port) });
 		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << remoteTarget << ", buff: " << buff << std::endl;
 	}
 

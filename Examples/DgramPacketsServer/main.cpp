@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) try
 	Address localhostTarget = Address::thishost(addrProtocol);
 	Socket sock(Socket::Type::Dgram, localhostTarget.getFamily());
 
-	sock.bind({ localhostTarget, std::stoi(port) });
+	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << std::stoi(port) << std::endl;
 
 	EndPoint remote;

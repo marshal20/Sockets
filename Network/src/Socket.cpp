@@ -21,12 +21,6 @@ Socket::Socket(Type type, Family family) :
 
 Socket::~Socket()
 {
-	// TODO: Remove debug string.
-	std::cout << "dtor " << this << ": " << m_sock << std::endl;
-
-	if (m_sock == -1) return;
-	if (::close(m_sock) == -1)
-		Error::runtime("close failed", errno);
 }
 
 Socket::operator bool() const
