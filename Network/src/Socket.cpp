@@ -48,7 +48,7 @@ void Socket::connect(const Address& addr, unsigned short port)
 {
 	int len = get_protocol_length(addr.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	AddressTosockaddr(addr, &temp_sockaddr_storage);
+	create_sockaddr_from_address(addr, port, &temp_sockaddr_storage);
 	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
 		Error::runtime("connect failed", errno);
 }
@@ -57,7 +57,7 @@ void Socket::bind(const Address& addr, unsigned short port)
 {
 	int len = get_protocol_length(addr.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	AddressTosockaddr(addr, &temp_sockaddr_storage);
+	create_sockaddr_from_address(addr, port, &temp_sockaddr_storage);
 	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
 		Error::runtime("Bind failed", errno);
 }
@@ -68,7 +68,7 @@ void Socket::listen(int prelog)
 		Error::runtime("listen failed", errno);
 }
 
-Socket Socket::accept(Address& remoteAddr)
+Socket Socket::accept(Address& remoteAddr, unsigned short& remotePort)
 {
 	Socket sock;
 	remoteAddr.m_valid = true;
@@ -77,7 +77,7 @@ Socket Socket::accept(Address& remoteAddr)
 	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
 		Error::runtime("accept failed", errno);
 
-	sockaddrToAddress(remoteAddr, &temp_sockaddr_storage);
+	create_address_from_sockaddr(remoteAddr, remotePort, &temp_sockaddr_storage);
 	return sock;
 }
 
@@ -101,7 +101,7 @@ int Socket::send(const void* buff, int len)
 	return sent;
 }
 
-int Socket::recvfrom(void* buff, int len, Address& sender)
+int Socket::recvfrom(void* buff, int len, Address& sender, unsigned short& port)
 {
 	if(m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
 
@@ -111,19 +111,19 @@ int Socket::recvfrom(void* buff, int len, Address& sender)
 	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
 		Error::runtime("recvfrom failed", errno);
 
-	sockaddrToAddress(sender, &temp_sockaddr_storage);
+	create_address_from_sockaddr(sender, port, &temp_sockaddr_storage);
 	sender.m_valid = true;
 
 	return recvd;
 }
 
-int Socket::sendto(const void* buff, int len, const Address& target)
+int Socket::sendto(const void* buff, int len, const Address& target, unsigned short port)
 {
 	if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 
 	int len_addr = get_protocol_length(target.m_addr.family);
 	sockaddr_storage temp_sockaddr_storage;
-	AddressTosockaddr(target, &temp_sockaddr_storage);
+	create_sockaddr_from_address(target,port, &temp_sockaddr_storage);
 
 	int sent;
 	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)
