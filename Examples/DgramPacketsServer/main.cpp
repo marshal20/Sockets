@@ -10,25 +10,26 @@ int main(int argc, char* argv[]) try
 	if (argc > 1)
 		port = argv[1];
 
-	Protocol addrProtocol = Protocol::IPv4;
+	Family addrProtocol = Family::IPv4;
 	if (argc > 2)
 		if (argv[2][0] == '6')
-			addrProtocol = Protocol::IPv6;
+			addrProtocol = Family::IPv6;
 
-	Address localhostTarget = Address::thishost(addrProtocol).setPort(std::stoi(port));
-	Socket sock(Socket::Type::Dgram, localhostTarget.getProtocol());
+	Address localhostTarget = Address::thishost(addrProtocol);
+	Socket sock(Socket::Type::Dgram, localhostTarget.getFamily());
 
-	sock.bind(localhostTarget);
-	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << localhostTarget.getPort() << std::endl;
+	sock.bind(localhostTarget, std::stoi(port));
+	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << std::stoi(port) << std::endl;
 
 	Address remoteaddr;
+	unsigned short remoteport;
 	char buff[1025];
 	int recvd;
-	while ((recvd = sock.recvfrom(buff, sizeof(buff) - 1, remoteaddr)) != 0)
+	while ((recvd = sock.recvfrom(buff, sizeof(buff) - 1, remoteaddr, remoteport)) != 0)
 	{
 		buff[recvd] = 0;
 		std::cout << "- Recieved " << recvd << " Bytes, from: " << remoteaddr << ", buff: " <<  buff << std::endl;
-		sock.sendto(buff, recvd, remoteaddr);
+		sock.sendto(buff, recvd, remoteaddr, remoteport);
 	}
 
 	sock.close();

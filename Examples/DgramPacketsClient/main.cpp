@@ -14,15 +14,15 @@ int main(int argc, char* argv[]) try
 	if (argc == 3)
 		port = argv[2];
 
-	Address remoteTarget = Address::fromPresentation(domainname).setPort(std::stoi(port));
+	Address remoteTarget = Address::fromPresentation(domainname);
 
-	Socket sock(Socket::Type::Dgram, remoteTarget.getProtocol());
+	Socket sock(Socket::Type::Dgram, remoteTarget.getFamily());
 	sock.beBroadcast();
 
 	char buff[1025];
 	while (std::cin.getline(buff, sizeof(buff)))
 	{
-		sock.sendto(buff, strlen(buff) + 1, remoteTarget);
+		sock.sendto(buff, strlen(buff) + 1, remoteTarget, std::stoi(port));
 		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << remoteTarget << ", buff: " << buff << std::endl;
 	}
 

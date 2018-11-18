@@ -11,8 +11,8 @@ int main(int argc, char* argv[]) try
 	std::cout << "localhost Address: " << Address::localhost() << std::endl;
 	std::cout << "thishost Address: " << Address::thishost() << std::endl;
 	std::cout << "Broadcast Address: " << Address::broadcast() << std::endl;
-	std::cout << "localhost Address IPv6: " << Address::localhost(Protocol::IPv6) << std::endl;
-	std::cout << "thishost Address IPv4: " << Address::thishost(Protocol::IPv6) << std::endl;
+	std::cout << "localhost Address IPv6: " << Address::localhost(Family::IPv6) << std::endl;
+	std::cout << "thishost Address IPv4: " << Address::thishost(Family::IPv6) << std::endl;
 	std::cout << "google.com: " << Address::fromPresentation("google.com") << std::endl;
 	std::cout << "example.com: " << Address::fromPresentation("example.com") << std::endl;
 
