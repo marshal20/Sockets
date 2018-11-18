@@ -1,5 +1,5 @@
 # Sockets
-Experimenting with UNIX sockets.
+Experimenting with sockets in Windows and Unix.
 
 ## TODO:
 - make EndPoint struct that ties Address and port together, or make a pair<Address, port>.
