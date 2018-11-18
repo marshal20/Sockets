@@ -6,6 +6,8 @@ set(SRC
 		src/Socket.cpp 
 		include/Network/Socket.hpp
 		src/sockImpl.hpp
+		src/util.cpp
+		src/util.hpp
 		src/errors.cpp
 		src/errors.hpp
 		)

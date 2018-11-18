@@ -1,13 +1,13 @@
 #pragma once
 #include <string>
 
-enum class Protocol
+enum class Family
 {
 	IPv4 = 1,
 	IPv6
 };
 
-inline std::string ProtocolToString(Protocol value)
+inline std::string ProtocolToString(Family value)
 {
-	return (value == Protocol::IPv4) ? std::string("IPv4") : std::string("IPv6");
+	return (value == Family::IPv4) ? std::string("IPv4") : std::string("IPv6");
 }

@@ -85,7 +85,7 @@ void connectCommand(Socket client_sock, char* buff, int currec)
 	server_sock.connect(toConnect);
 	std::cout << "- Connected to address: " << toConnect << ", port:" << toConnect.getPort() << std::endl;
 
-	std::string res = req.protocol + " 200 ok\r\n\r\n";
+	std::string res = req.protocol + " 200 ok\r\nconnection: keep-alive\r\n\r\n";
 	client_sock.send(res.c_str(), res.length());
 	std::cout << "proxy res: " << res << std::endl;
 
@@ -116,16 +116,59 @@ void connectCommand(Socket client_sock, char* buff, int currec)
 	server_sock.close();
 }
 
+//
+struct GetRequest
+{
+	std::string get;
+	std::string domain;
+	std::string url;
+	std::string protocol;
+};
+
+GetRequest parseGetRequest(const std::string& request)
+{
+	std::string host = "";
+	std::regex Hostregex("(GET)\\s+http://([A-Za-z.]+)(\\S+)\\s+(\\S+)"); // Host\\s*:\\s*(\\S+)
+	std::smatch matchs;
+
+	std::regex_search(request, matchs, Hostregex);
+	/*for (auto& mat : matchs)
+		std::cout << mat << std::endl;*/
+
+	return { matchs[1], matchs[2], matchs[3], matchs[4] };
+}
+//
+
+
 void getCommand(Socket client_sock, char* buff, int currec)
 {
 	std::string website = getHost(buff);
 	Socket server_sock;
-	server_sock.connect(Address::fromPresentation(website).setPort(80));
+	server_sock.connect(Address::fromPresentation(website).setPort(88));
+
+	auto Req = splitString(buff, '\n');
+	GetRequest reqInfo = parseGetRequest(Req[0]);
+	Req[0] = reqInfo.get + " " + reqInfo.url + " " + reqInfo.protocol + "\r";
+	std::string editedReq = "";
+	for (auto& str : Req)
+		editedReq += str + "\n";
+	//editedReq += "\r\n";
+	std::cout << std::endl << std::endl << editedReq << "END OF EDITED REQUEST" << std::endl << std::endl;
+
+	int rsend = server_sock.send(editedReq.c_str(), editedReq.length());
+	currec = server_sock.recv(buff, sizeof(buff));
+	buff[currec] = 0;
+	std::cout << std::endl << currec << std::endl << buff << std::endl << std::endl;
+	client_sock.send(buff, currec);
 
 	bool close = false;
 	while (!close)
 	{
 		int send;
+		std::cout << "\n----- RequestStarted -----\n";
+
+		currec = client_sock.recv(buff, sizeof(buff));
+		std::cout << "- Recieved from client " << currec << " Bytes" << std::endl;
 		if (currec == 0) { close = true; continue; }
 
 		send = server_sock.send(buff, currec);
@@ -138,12 +181,7 @@ void getCommand(Socket client_sock, char* buff, int currec)
 		send = client_sock.send(buff, currec);
 		std::cout << "- Sent to client " << send << " Bytes" << std::endl;
 
-		currec = client_sock.recv(buff, sizeof(buff));
-
-		std::cout << "----- RequestServed -----\n";
-
-		std::cout << "\n----- RequestStarted -----\n";
-		std::cout << "- Recieved from client " << currec << " Bytes" << std::endl;
+		std::cout << "----- RequestServed -----\n";	
 	}
 
 	server_sock.close();

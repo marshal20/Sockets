@@ -11,7 +11,7 @@ public:
 		Dgram
 	};
 
-	Socket(Type type = Type::Stream, Protocol family = Protocol::IPv4);
+	Socket(Type type = Type::Stream, Family family = Family::IPv4);
 	~Socket();
 
 	operator bool() const;
@@ -19,8 +19,8 @@ public:
 	void close();
 	void beBroadcast();
 
-	void connect(const Address& addr);
-	void bind(const Address& addr);
+	void connect(const Address& addr, unsigned short port);
+	void bind(const Address& addr, unsigned short port);
 	void listen(int prelog = 10);
 	Socket accept(Address& remoteAddr);
 	int recv(void* buff, int len);
@@ -34,7 +34,7 @@ public:
 private:
 	int m_sock = -1;
 	Type m_type = Type::Stream;
-	Protocol m_protocol = Protocol::IPv4;
+	Family m_family = Family::IPv4;
 	struct Monitor
 	{
 		int recv;

@@ -17,13 +17,12 @@ struct IPv6 {
 
 struct Addr
 {
-	Protocol type;
+	Family family;
 	union
 	{
 		IPv4 v4;
 		IPv6 v6;
 	};
-	unsigned short port;
 };
 
 class Address
@@ -34,19 +33,16 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
-	unsigned short getPort() const;
-	Address setPort(unsigned short value);
-
 	Address setIP(const IPv4& value);
 	Address setIP(const IPv6& value);
 
-	Protocol getProtocol() const;
+	Family getFamily() const;
 
 	std::string getPresentation() const;
 	static std::vector<Address> fromPresentationAll(const std::string& rep);
 	static Address fromPresentation(const std::string& rep);
-	static Address localhost(Protocol IPversion = Protocol::IPv4);
-	static Address thishost(Protocol IPversion = Protocol::IPv4);
+	static Address localhost(Family family = Family::IPv4);
+	static Address thishost(Family family = Family::IPv4);
 	static Address broadcast();
 
 private:
@@ -54,8 +50,8 @@ private:
 	static Address Addressfromin6addr(const struct in6_addr* in6addr);
 
 private:
-	friend void AddressTosockaddr(const Address& val, sockaddr_storage* sockaddr);
-	friend void sockaddrToAddress(Address& val, const sockaddr_storage* sockaddr);
+	friend void AddressTosockaddr(const Address& val, unsigned short port, sockaddr_storage* sockaddr);
+	friend void sockaddrToAddress(Address& val, unsigned short& port, const sockaddr_storage* sockaddr);
 
 private:
 	friend class Socket;
