@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <utility>
 
 struct sockaddr_storage;
 
@@ -56,3 +57,4 @@ private:
 	Addr m_addr;
 	bool m_valid = false;
 };
+
