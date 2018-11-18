@@ -19,8 +19,20 @@ Socket::Socket(Type type, Family family) :
 		Error::runtime("socket failed", errno);
 }
 
+Socket::Socket(Socket&& other)
+{
+	m_sock = other.m_sock;
+	m_type = other.m_type;
+	m_family = other.m_family;
+	m_monitor = other.m_monitor;
+
+	other.m_sock = -1;
+}
+
 Socket::~Socket()
 {
+	// TODO: Remove debug string.
+	std::cout << "dtor " << this << ": " << m_sock << std::endl;
 }
 
 Socket::operator bool() const

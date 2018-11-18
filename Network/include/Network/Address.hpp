@@ -5,8 +5,6 @@
 #include <iostream>
 #include <utility>
 
-struct sockaddr_storage;
-
 struct IPv4 {
 	unsigned char a, b, c, d;
 };
@@ -49,8 +47,8 @@ private:
 	friend Address create_address_from_ipv4addr(int val);
 	friend Address create_address_from_ipv6addr(const struct in6_addr* in6addr);
 
-	friend void create_sockaddr_from_address(const Address& address, unsigned short port, sockaddr_storage* sockaddr);
-	friend void create_address_from_sockaddr(Address& address, unsigned short& port, const sockaddr_storage* sockaddr);
+	friend void create_sockaddr_from_address(const Address& address, unsigned short port, struct sockaddr_storage* sockaddr);
+	friend void create_address_from_sockaddr(Address& address, unsigned short& port, const struct sockaddr_storage* sockaddr);
 
 private:
 	friend class Socket;

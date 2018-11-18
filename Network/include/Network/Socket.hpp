@@ -13,6 +13,7 @@ public:
 	};
 
 	Socket(Type type = Type::Stream, Family family = Family::IPv4);
+	Socket(Socket&& other);
 	~Socket();
 
 	operator bool() const;
