@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 // global constants
 const char* port = "8080";
@@ -57,7 +58,7 @@ void serveClient(Socket client_sock)
 	int currec;
 
 	Socket server_sock;
-	server_sock.connect(Address::fromPresentation(website).setPort(80));
+	server_sock.connect({ Address::fromPresentation(website), 80 });
 
 	bool close = false;
 	while (!close)
@@ -99,19 +100,21 @@ int main(int argc, char* argv[]) try
 	if (argc > 2)
 		website = argv[2];
 
-	Address localhostTarget = Address::thishost(Protocol::IPv4).setPort(std::stoi(port)); // thishost:port
-	Socket sock(Socket::Type::Stream, localhostTarget.getProtocol());
+	Address localhostTarget = Address::thishost(Family::IPv4); // thishost:port
+	Socket sock(Socket::Type::Stream, localhostTarget.getFamily());
 
-	sock.bind(localhostTarget);
+	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	std::cout << "- Server will spoof: " << website << std::endl;
 	sock.listen();
 
-	Socket client_sock; Address new_addr;
-	while (client_sock = sock.accept(new_addr))
+	while (true)
 	{
+		Socket client_sock; EndPoint new_addr;
+		std::tie(client_sock, new_addr) = sock.accept();
 		// new connection
-		std::cout << "- Info: new connection, Address: " << new_addr << std::endl;
+		std::cout << "- Info: new connection, Address: " 
+			<< new_addr.address << ":" << new_addr.port << std::endl;
 		serveClient(client_sock);
 	}
 
