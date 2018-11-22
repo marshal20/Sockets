@@ -27,12 +27,11 @@ class Address
 {
 public:
 	Address();
+	Address(const IPv4& value);
+	Address(const IPv6& value);
 	~Address();
 
 	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
-
-	Address setIP(const IPv4& value);
-	Address setIP(const IPv6& value);
 
 	Family getFamily() const;
 

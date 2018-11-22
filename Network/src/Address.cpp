@@ -16,6 +16,20 @@ Address::Address()
 
 }
 
+Address::Address(const IPv4& value)
+{
+	m_valid = true;
+	m_addr.family = Family::IPv4;
+	m_addr.v4 = value;
+}
+
+Address::Address(const IPv6& value)
+{
+	m_valid = true;
+	m_addr.family = Family::IPv6;
+	m_addr.v6 = value;
+}
+
 Address::~Address()
 {
 }
@@ -23,22 +37,6 @@ Address::~Address()
 std::ostream& operator<<(std::ostream& os, const Address& addr)
 {
 	return os << addr.getPresentation();
-}
-
-Address Address::setIP(const IPv4& value)
-{
-	m_valid = true;
-	m_addr.family = Family::IPv4;
-	m_addr.v4 = value;
-	return *this;
-}
-
-Address Address::setIP(const IPv6& value)
-{
-	m_valid = true;
-	m_addr.family = Family::IPv6;
-	m_addr.v6 = value;
-	return *this;
 }
 
 Family Address::getFamily() const
