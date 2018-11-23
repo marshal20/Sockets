@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>
+#include "util.hpp"
 
 int get_protocol_length(Family family) {
 	return (family == Family::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);

@@ -112,7 +112,7 @@ Address Address::fromPresentation(const std::string& rep)
 Address Address::localhost(Family family)
 {
 	if(family == Family::IPv4)
-		return create_address_from_ipv4addr(INADDR_LOOPBACK);
+		return create_address_from_ipv4addr(htonl(INADDR_LOOPBACK));
 
 	return create_address_from_ipv6addr(&in6addr_loopback);
 }
@@ -120,14 +120,14 @@ Address Address::localhost(Family family)
 Address Address::thishost(Family family)
 {
 	if (family == Family::IPv4)
-		return create_address_from_ipv4addr(INADDR_ANY);
+		return create_address_from_ipv4addr(htonl(INADDR_ANY));
 
 	return create_address_from_ipv6addr(&in6addr_any);
 }
 
 Address Address::broadcast()
 {
-	return create_address_from_ipv4addr(INADDR_BROADCAST);
+	return create_address_from_ipv4addr(htonl(INADDR_BROADCAST));
 }
 
 

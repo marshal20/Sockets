@@ -29,46 +29,59 @@ void create_address_from_sockaddr(Address& address, unsigned short& port, const 
 {
 	if (sockaddr->ss_family == PF_INET)
 	{
-		address.m_addr.family = Family::IPv4;
+		IPv4 v4;
+
 		sockaddr_in* temp = (sockaddr_in*)sockaddr;
 		unsigned char* v4_interm = (unsigned char*)&temp->sin_addr;
-		address.m_addr.v4.a = v4_interm[0]; address.m_addr.v4.b = v4_interm[1];
-		address.m_addr.v4.c = v4_interm[2]; address.m_addr.v4.d = v4_interm[3];
+		v4.a = v4_interm[0]; v4.b = v4_interm[1];
+		v4.c = v4_interm[2]; v4.d = v4_interm[3];
+
+		address = v4;
 		port = ntohs(temp->sin_port);
 		return;
 	}
 
 	// IPv6
-	address.m_addr.family = Family::IPv6;
+	IPv6 v6;
+
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
 	unsigned short* v6_interm = (unsigned short*)&temp->sin6_addr;
-	// make an array of unsigned short so that we don't worry about endians
-	address.m_addr.v6.a = ntohs(v6_interm[0]); address.m_addr.v6.b = ntohs(v6_interm[1]);
-	address.m_addr.v6.c = ntohs(v6_interm[2]); address.m_addr.v6.d = ntohs(v6_interm[3]);
-	address.m_addr.v6.e = ntohs(v6_interm[4]); address.m_addr.v6.f = ntohs(v6_interm[5]);
-	address.m_addr.v6.g = ntohs(v6_interm[6]); address.m_addr.v6.h = ntohs(v6_interm[7]);
+	
+	v6.a = ntohs(v6_interm[0]); v6.b = ntohs(v6_interm[1]);
+	v6.c = ntohs(v6_interm[2]); v6.d = ntohs(v6_interm[3]);
+	v6.e = ntohs(v6_interm[4]); v6.f = ntohs(v6_interm[5]);
+	v6.g = ntohs(v6_interm[6]); v6.h = ntohs(v6_interm[7]);
 
+	address = v6;
 	port = ntohs(temp->sin6_port);
 }
 
+// Works with ints in network byte order.
 Address create_address_from_ipv4addr(int val)
 {
-	Address temp;
-	temp.m_valid = true;
-	*(int*)&temp.m_addr.v4 = ntohl(val);
-	temp.m_addr.family = Family::IPv4;
-	return temp;
+	const unsigned char* vals = (const unsigned char*)&val;
+
+	return IPv4{
+		vals[0],
+		vals[1],
+		vals[2],
+		vals[3]
+	};
 }
 
+// Works with value in network byte order.
 Address create_address_from_ipv6addr(const struct in6_addr* in6addr)
 {
-	Address temp;
-	unsigned short dummy_port = 0;
-	temp.m_valid = true;
-	sockaddr_in6 temp_addr6;
-	memset(&temp_addr6, 0, sizeof(temp_addr6));
-	temp_addr6.sin6_family = PF_INET6;
-	memcpy(&temp_addr6.sin6_addr, in6addr, sizeof(in6_addr));
-	create_address_from_sockaddr(temp, dummy_port, (const sockaddr_storage*)&temp_addr6);
-	return temp;
+	const unsigned short* vals = (const unsigned short*)in6addr;
+
+	return IPv6{
+		ntohs(vals[0]),
+		ntohs(vals[1]),
+		ntohs(vals[2]),
+		ntohs(vals[3]),
+		ntohs(vals[4]),
+		ntohs(vals[5]),
+		ntohs(vals[6]),
+		ntohs(vals[7])
+	};
 }
