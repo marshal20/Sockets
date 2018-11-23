@@ -29,37 +29,24 @@ void create_address_from_sockaddr(Address& address, unsigned short& port, const 
 {
 	if (sockaddr->ss_family == PF_INET)
 	{
-		IPv4 v4;
-
 		sockaddr_in* temp = (sockaddr_in*)sockaddr;
-		unsigned char* v4_interm = (unsigned char*)&temp->sin_addr;
-		v4.a = v4_interm[0]; v4.b = v4_interm[1];
-		v4.c = v4_interm[2]; v4.d = v4_interm[3];
 
-		address = v4;
+		address = create_address_from_ipv4addr(temp->sin_addr.s_addr);
 		port = ntohs(temp->sin_port);
 		return;
 	}
 
 	// IPv6
-	IPv6 v6;
-
 	sockaddr_in6* temp = (sockaddr_in6*)sockaddr;
-	unsigned short* v6_interm = (unsigned short*)&temp->sin6_addr;
 	
-	v6.a = ntohs(v6_interm[0]); v6.b = ntohs(v6_interm[1]);
-	v6.c = ntohs(v6_interm[2]); v6.d = ntohs(v6_interm[3]);
-	v6.e = ntohs(v6_interm[4]); v6.f = ntohs(v6_interm[5]);
-	v6.g = ntohs(v6_interm[6]); v6.h = ntohs(v6_interm[7]);
-
-	address = v6;
+	address = create_address_from_ipv6addr(&temp->sin6_addr);
 	port = ntohs(temp->sin6_port);
 }
 
-// Works with ints in network byte order.
-Address create_address_from_ipv4addr(int val)
+// Works with value in network byte order.
+Address create_address_from_ipv4addr(uint32_t inaddr)
 {
-	const unsigned char* vals = (const unsigned char*)&val;
+	const unsigned char* vals = (const unsigned char*)&inaddr;
 
 	return IPv4{
 		vals[0],
