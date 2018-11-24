@@ -89,7 +89,7 @@ namespace nt
 		return std::make_pair(sock, EndPoint({ addr, port }));
 	}
 
-	int Socket::Recv(void* buff, int len)
+	int Socket::Recv(char* buff, int len)
 	{
 		int recieved;
 		if ((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
@@ -99,7 +99,7 @@ namespace nt
 		return recieved;
 	}
 
-	int Socket::Send(const void* buff, int len)
+	int Socket::Send(const char* buff, int len)
 	{
 		int sent;
 		if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
@@ -109,7 +109,16 @@ namespace nt
 		return sent;
 	}
 
-	std::pair<int, EndPoint> Socket::RecvFrom(void* buff, int len)
+	void Socket::SendAll(const char* buff, int len)
+	{
+		int sent = 0;
+		while (sent < len)
+		{
+			sent += Send((buff + sent), len - sent);
+		}
+	}
+
+	std::pair<int, EndPoint> Socket::RecvFrom(char* buff, int len)
 	{
 		Address sender;
 		unsigned short port;
@@ -128,7 +137,7 @@ namespace nt
 		return std::make_pair(recvd, EndPoint({ sender, port }));
 	}
 
-	int Socket::SendTo(const void* buff, int len, const EndPoint& endpoint)
+	int Socket::SendTo(const char* buff, int len, const EndPoint& endpoint)
 	{
 		if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 

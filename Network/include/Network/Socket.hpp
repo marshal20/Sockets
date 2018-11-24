@@ -29,10 +29,11 @@ namespace nt
 		void Listen(int prelog = 10);
 		std::pair<Socket, EndPoint> Accept();
 
-		int Recv(void* buff, int len);
-		int Send(const void* buff, int len);
-		std::pair<int, EndPoint> RecvFrom(void* buff, int len);
-		int SendTo(const void* buff, int len, const EndPoint& endpoint);
+		int Recv(char* buff, int len);
+		int Send(const char* buff, int len);
+		void SendAll(const char* buff, int len);
+		std::pair<int, EndPoint> RecvFrom(char* buff, int len);
+		int SendTo(const char* buff, int len, const EndPoint& endpoint);
 
 		EndPoint GetPeer() const;
 		int GetTotalRecv() const;

@@ -6,4 +6,3 @@ Experimenting with sockets in Windows and Unix.
 - Refactor and simplify the API interface.
 - Improve the error reporting system.
 - Add a global function "gethostname".
-- Add sendall method to Socket class.
