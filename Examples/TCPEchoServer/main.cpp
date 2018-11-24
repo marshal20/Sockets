@@ -14,13 +14,13 @@ void session(Socket remote_socket, EndPoint remote_endpoint) try
 
 	char buff[1024];
 	int currec;
-	while ((currec = remote_socket.recv(buff, sizeof(buff))) != 0)
+	while ((currec = remote_socket.Recv(buff, sizeof(buff))) != 0)
 	{
-		remote_socket.send(buff, currec);
+		remote_socket.Send(buff, currec);
 	}
 
 	printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
-		remote_socket.getTotalrecv(), remote_socket.getTotalsent());
+		remote_socket.GetTotalRecv(), remote_socket.GetTotalSent());
 }
 catch (std::exception& e)
 {
@@ -38,23 +38,23 @@ int main(int argc, char* argv[]) try
 		if (argv[2][0] == '6')
 			addrProtocol = Family::IPv6;
 
-	Address localhostTarget = Address::thishost(addrProtocol); // thishost:port
-	Socket sock(Socket::Type::Stream, localhostTarget.getFamily());
+	Address localhostTarget = Address::Thishost(addrProtocol); // thishost:port
+	Socket sock(Socket::Type::Stream, localhostTarget.GetFamily());
 
-	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
+	sock.Bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
-	sock.listen();
+	sock.Listen();
 
 	while (true)
 	{
 		// Accept the new connection
 		Socket new_sock; EndPoint new_endpoint;
-		std::tie(new_sock, new_endpoint) = sock.accept();
+		std::tie(new_sock, new_endpoint) = sock.Accept();
 		// Create a session thread then detach it.
 		std::thread(session, new_sock, new_endpoint).detach();
 	}
 
-	sock.close();
+	sock.Close();
 	return 0;
 }
 catch (std::exception& e)

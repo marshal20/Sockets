@@ -38,14 +38,15 @@ namespace nt
 
 		friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
-		Family getFamily() const;
-		std::string getPresentation() const;
+		Family GetFamily() const;
+		std::string GetPresentation() const;
 
-		static std::vector<Address> fromPresentationAll(const std::string& rep);
-		static Address fromPresentation(const std::string& rep);
-		static Address localhost(Family family = Family::IPv4);
-		static Address thishost(Family family = Family::IPv4);
-		static Address broadcast();
+		static std::vector<Address> FromPresentationAll(const std::string& rep);
+		static Address FromPresentation(const std::string& rep);
+
+		static Address Localhost(Family family = Family::IPv4);
+		static Address Thishost(Family family = Family::IPv4);
+		static Address Broadcast();
 
 	private:
 		friend class Socket;

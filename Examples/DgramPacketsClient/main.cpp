@@ -15,19 +15,19 @@ int main(int argc, char* argv[]) try
 	if (argc == 3)
 		port = argv[2];
 
-	Address remoteTarget = Address::fromPresentation(domainname);
+	Address remoteTarget = Address::FromPresentation(domainname);
 
-	Socket sock(Socket::Type::Dgram, remoteTarget.getFamily());
-	sock.beBroadcast();
+	Socket sock(Socket::Type::Dgram, remoteTarget.GetFamily());
+	sock.BeBroadcast();
 
 	char buff[1025];
 	while (std::cin.getline(buff, sizeof(buff)))
 	{
-		sock.sendto(buff, strlen(buff) + 1, { remoteTarget, (unsigned short)std::stoi(port) });
+		sock.SendTo(buff, strlen(buff) + 1, { remoteTarget, (unsigned short)std::stoi(port) });
 		std::cout << "- sent " << strlen(buff) + 1 << " Bytes, to: " << remoteTarget << ", buff: " << buff << std::endl;
 	}
 
-	sock.close();
+	sock.Close();
 	return 0;
 }
 catch (std::exception& e)

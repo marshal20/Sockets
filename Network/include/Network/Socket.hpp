@@ -21,20 +21,21 @@ namespace nt
 
 		operator bool() const;
 
-		void close();
-		void beBroadcast();
+		void Close();
+		void BeBroadcast();
 
-		void connect(const EndPoint& endpoint);
-		void bind(const EndPoint& endpoint);
-		void listen(int prelog = 10);
-		std::pair<Socket, EndPoint> accept();
-		int recv(void* buff, int len);
-		int send(const void* buff, int len);
-		std::pair<int, EndPoint> recvfrom(void* buff, int len);
-		int sendto(const void* buff, int len, const EndPoint& endpoint);
+		void Connect(const EndPoint& endpoint);
+		void Bind(const EndPoint& endpoint);
+		void Listen(int prelog = 10);
+		std::pair<Socket, EndPoint> Accept();
 
-		int getTotalrecv() const;
-		int getTotalsent() const;
+		int Recv(void* buff, int len);
+		int Send(const void* buff, int len);
+		std::pair<int, EndPoint> RecvFrom(void* buff, int len);
+		int SendTo(const void* buff, int len, const EndPoint& endpoint);
+
+		int GetTotalRecv() const;
+		int GetTotalSent() const;
 
 	private:
 		int m_sock = -1;

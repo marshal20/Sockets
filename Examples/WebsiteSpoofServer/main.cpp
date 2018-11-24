@@ -60,14 +60,14 @@ void serveClient(Socket client_sock)
 	int currec;
 
 	Socket server_sock;
-	server_sock.connect({ Address::fromPresentation(website), 80 });
+	server_sock.Connect({ Address::FromPresentation(website), 80 });
 
 	bool close = false;
 	while (!close)
 	{
 		int send;
 
-		currec = client_sock.recv(buff, sizeof(buff));
+		currec = client_sock.Recv(buff, sizeof(buff));
 		if (currec == 0) { close = true; continue; }
 		std::cout << "\n----- RequestStarted -----\n";
 		std::cout << "- Recieved from client " << currec << " Bytes" << std::endl;
@@ -78,20 +78,20 @@ void serveClient(Socket client_sock)
 		std::string myHost = getHost(request);
 		replaceHost(request, website);
 
-		send = server_sock.send(request.c_str(), request.length());
+		send = server_sock.Send(request.c_str(), request.length());
 		std::cout << "- Sent to website " << send << " Bytes" << std::endl;
 
-		currec = server_sock.recv(buff, sizeof(buff));
+		currec = server_sock.Recv(buff, sizeof(buff));
 		if (currec == 0) close = true;
 		std::cout << "- Recieved from website " << currec << " Bytes" << std::endl;
 
-		send = client_sock.send(buff, currec);
+		send = client_sock.Send(buff, currec);
 		std::cout << "- Sent to client " << send << " Bytes" << std::endl;
 
 		std::cout << "----- RequestServed -----\n";
 	}
 
-	server_sock.close();
+	server_sock.Close();
 }
 
 int main(int argc, char* argv[]) try
@@ -102,25 +102,25 @@ int main(int argc, char* argv[]) try
 	if (argc > 2)
 		website = argv[2];
 
-	Address localhostTarget = Address::thishost(Family::IPv4); // thishost:port
-	Socket sock(Socket::Type::Stream, localhostTarget.getFamily());
+	Address localhostTarget = Address::Thishost(Family::IPv4); // thishost:port
+	Socket sock(Socket::Type::Stream, localhostTarget.GetFamily());
 
-	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
+	sock.Bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	std::cout << "- Server will spoof: " << website << std::endl;
-	sock.listen();
+	sock.Listen();
 
 	while (true)
 	{
 		Socket client_sock; EndPoint new_addr;
-		std::tie(client_sock, new_addr) = sock.accept();
+		std::tie(client_sock, new_addr) = sock.Accept();
 		// new connection
 		std::cout << "- Info: new connection, Address: " 
 			<< new_addr.address << ":" << new_addr.port << std::endl;
 		serveClient(client_sock);
 	}
 
-	sock.close();
+	sock.Close();
 	return 0;
 }
 catch (std::exception& e)

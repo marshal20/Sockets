@@ -32,14 +32,14 @@ namespace nt
 		return (m_sock == -1) ? false : true;
 	}
 
-	void Socket::close()
+	void Socket::Close()
 	{
 		if (m_sock == -1) return;
 		if (::close(m_sock) == -1)
 			Error::runtime("close failed", errno);
 	}
 
-	void Socket::beBroadcast()
+	void Socket::BeBroadcast()
 	{
 		if (m_type != Type::Dgram) Error::runtime("can't make a stream socket broadcast");
 
@@ -48,7 +48,7 @@ namespace nt
 			Error::runtime("setsockopt failed to set socket to broadcast", errno);
 	}
 
-	void Socket::connect(const EndPoint& endpoint)
+	void Socket::Connect(const EndPoint& endpoint)
 	{
 		int len = get_protocol_length(endpoint.address.m_addr.family);
 		sockaddr_storage temp_sockaddr_storage;
@@ -57,7 +57,7 @@ namespace nt
 			Error::runtime("connect failed", errno);
 	}
 
-	void Socket::bind(const EndPoint& endpoint)
+	void Socket::Bind(const EndPoint& endpoint)
 	{
 		int len = get_protocol_length(endpoint.address.m_addr.family);
 		sockaddr_storage temp_sockaddr_storage;
@@ -66,13 +66,13 @@ namespace nt
 			Error::runtime("Bind failed", errno);
 	}
 
-	void Socket::listen(int prelog)
+	void Socket::Listen(int prelog)
 	{
 		if (::listen(m_sock, prelog) == -1)
 			Error::runtime("listen failed", errno);
 	}
 
-	std::pair<Socket, EndPoint> Socket::accept()
+	std::pair<Socket, EndPoint> Socket::Accept()
 	{
 		Socket sock;
 		Address addr;
@@ -89,7 +89,7 @@ namespace nt
 		return std::make_pair(sock, EndPoint({ addr, port }));
 	}
 
-	int Socket::recv(void* buff, int len)
+	int Socket::Recv(void* buff, int len)
 	{
 		int recieved;
 		if ((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
@@ -99,7 +99,7 @@ namespace nt
 		return recieved;
 	}
 
-	int Socket::send(const void* buff, int len)
+	int Socket::Send(const void* buff, int len)
 	{
 		int sent;
 		if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
@@ -109,7 +109,7 @@ namespace nt
 		return sent;
 	}
 
-	std::pair<int, EndPoint> Socket::recvfrom(void* buff, int len)
+	std::pair<int, EndPoint> Socket::RecvFrom(void* buff, int len)
 	{
 		Address sender;
 		unsigned short port;
@@ -128,7 +128,7 @@ namespace nt
 		return std::make_pair(recvd, EndPoint({ sender, port }));
 	}
 
-	int Socket::sendto(const void* buff, int len, const EndPoint& endpoint)
+	int Socket::SendTo(const void* buff, int len, const EndPoint& endpoint)
 	{
 		if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
 
@@ -145,11 +145,11 @@ namespace nt
 	}
 
 
-	int Socket::getTotalrecv() const {
+	int Socket::GetTotalRecv() const {
 		return m_monitor.recv;
 	}
 
-	int Socket::getTotalsent() const {
+	int Socket::GetTotalSent() const {
 		return m_monitor.sent;
 	}
 

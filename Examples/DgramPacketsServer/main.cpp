@@ -17,10 +17,10 @@ int main(int argc, char* argv[]) try
 		if (argv[2][0] == '6')
 			addrProtocol = Family::IPv6;
 
-	Address localhostTarget = Address::thishost(addrProtocol);
-	Socket sock(Socket::Type::Dgram, localhostTarget.getFamily());
+	Address localhostTarget = Address::Thishost(addrProtocol);
+	Socket sock(Socket::Type::Dgram, localhostTarget.GetFamily());
 
-	sock.bind({ localhostTarget, (unsigned short)std::stoi(port) });
+	sock.Bind({ localhostTarget, (unsigned short)std::stoi(port) });
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << std::stoi(port) << std::endl;
 
 	EndPoint remote;
@@ -28,15 +28,15 @@ int main(int argc, char* argv[]) try
 	int recvd;
 	while (true)
 	{
-		std::tie(recvd, remote) = sock.recvfrom(buff, sizeof(buff) - 1);
+		std::tie(recvd, remote) = sock.RecvFrom(buff, sizeof(buff) - 1);
 		if (recvd == 0) break;
 
 		buff[recvd] = 0;
 		std::cout << "- Recieved " << recvd << " Bytes, from: " << remote.address << ", buff: " <<  buff << std::endl;
-		sock.sendto(buff, recvd, remote);
+		sock.SendTo(buff, recvd, remote);
 	}
 
-	sock.close();
+	sock.Close();
 	return 0;
 }
 catch (std::exception& e)

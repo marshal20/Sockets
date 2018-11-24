@@ -39,15 +39,15 @@ namespace nt
 
 	std::ostream& operator<<(std::ostream& os, const Address& addr)
 	{
-		return os << addr.getPresentation();
+		return os << addr.GetPresentation();
 	}
 
-	Family Address::getFamily() const
+	Family Address::GetFamily() const
 	{
 		return m_addr.family;
 	}
 
-	std::string Address::getPresentation() const
+	std::string Address::GetPresentation() const
 	{
 		if (!m_valid) return "Invalid address";
 
@@ -76,7 +76,7 @@ namespace nt
 		return std::string(temp);
 	}
 
-	std::vector<Address> Address::fromPresentationAll(const std::string& rep)
+	std::vector<Address> Address::FromPresentationAll(const std::string& rep)
 	{
 		std::vector<Address> addrs;
 
@@ -107,12 +107,12 @@ namespace nt
 		return addrs;
 	}
 
-	Address Address::fromPresentation(const std::string& rep)
+	Address Address::FromPresentation(const std::string& rep)
 	{
-		return fromPresentationAll(rep)[0];
+		return FromPresentationAll(rep)[0];
 	}
 
-	Address Address::localhost(Family family)
+	Address Address::Localhost(Family family)
 	{
 		if (family == Family::IPv4)
 			return create_address_from_ipv4addr(htonl(INADDR_LOOPBACK));
@@ -120,7 +120,7 @@ namespace nt
 		return create_address_from_ipv6addr(&in6addr_loopback);
 	}
 
-	Address Address::thishost(Family family)
+	Address Address::Thishost(Family family)
 	{
 		if (family == Family::IPv4)
 			return create_address_from_ipv4addr(htonl(INADDR_ANY));
@@ -128,7 +128,7 @@ namespace nt
 		return create_address_from_ipv6addr(&in6addr_any);
 	}
 
-	Address Address::broadcast()
+	Address Address::Broadcast()
 	{
 		return create_address_from_ipv4addr(htonl(INADDR_BROADCAST));
 	}
