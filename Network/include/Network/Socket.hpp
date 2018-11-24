@@ -34,6 +34,7 @@ namespace nt
 		std::pair<int, EndPoint> RecvFrom(void* buff, int len);
 		int SendTo(const void* buff, int len, const EndPoint& endpoint);
 
+		EndPoint GetPeer() const;
 		int GetTotalRecv() const;
 		int GetTotalSent() const;
 

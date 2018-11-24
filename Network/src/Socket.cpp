@@ -144,6 +144,20 @@ namespace nt
 		return sent;
 	}
 
+	EndPoint Socket::GetPeer() const
+	{
+		Address peer_address;
+		unsigned short peer_port;
+		sockaddr peer_sockaddr;
+		socklen_t peer_sockaddr_len;
+
+		if (::getpeername(m_sock, &peer_sockaddr, &peer_sockaddr_len) == -1)
+			Error::runtime("getpeer failed", errno);
+
+		create_address_from_sockaddr(peer_address, peer_port, (const sockaddr_storage*)&peer_sockaddr);
+
+		return { peer_address, peer_port };
+	}
 
 	int Socket::GetTotalRecv() const {
 		return m_monitor.recv;

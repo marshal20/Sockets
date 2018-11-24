@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) try
 		std::tie(client_sock, new_addr) = sock.Accept();
 		// new connection
 		std::cout << "- Info: new connection, Address: " 
-			<< new_addr.address << ":" << new_addr.port << std::endl;
+			<< new_addr << std::endl;
 		serveClient(client_sock);
 	}
 

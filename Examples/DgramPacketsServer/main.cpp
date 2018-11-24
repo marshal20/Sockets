@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) try
 		if (recvd == 0) break;
 
 		buff[recvd] = 0;
-		std::cout << "- Recieved " << recvd << " Bytes, from: " << remote.address << ", buff: " <<  buff << std::endl;
+		std::cout << "- Recieved " << recvd << " Bytes, from: " << remote << ", buff: " <<  buff << std::endl;
 		sock.SendTo(buff, recvd, remote);
 	}
 

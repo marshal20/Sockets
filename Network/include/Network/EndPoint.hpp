@@ -14,4 +14,9 @@ namespace nt
 		unsigned short port;
 	};
 
+	inline std::ostream& operator<<(std::ostream& os, const EndPoint& endpoint)
+	{
+		return os << endpoint.address << ":" << endpoint.port;
+	}
+
 }

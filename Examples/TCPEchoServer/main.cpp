@@ -10,7 +10,7 @@ void session(Socket remote_socket, EndPoint remote_endpoint) try
 {
 	// new connection
 	std::cout << "- Info: new session, Address: "
-		<< remote_endpoint.address << ":" << remote_endpoint.port << std::endl;
+		<< remote_endpoint << std::endl;
 
 	char buff[1024];
 	int currec;
