@@ -7,14 +7,10 @@ using namespace nt; // Not recommended.
 
 EndPoint server_address;
 
-void session(Socket client_socket, EndPoint client_address) try
+void upstream(Socket server_socket, Socket client_socket)
 {
 	char buffer[2048];
 	int recved;
-	Socket server_socket(Socket::Type::Stream, server_address.address.GetFamily());
-
-	std::cout << "- New connection: " << client_address << std::endl;
-	server_socket.Connect(server_address);
 
 	while (true)
 	{
@@ -23,13 +19,38 @@ void session(Socket client_socket, EndPoint client_address) try
 			break;
 
 		server_socket.Send(buffer, recved);
+	}
+}
 
+void downstream(Socket server_socket, Socket client_socket)
+{
+	char buffer[2048];
+	int recved;
+
+	while (true)
+	{
 		recved = server_socket.Recv(buffer, sizeof(buffer));
 		if (recved == 0)
 			break;
 
 		client_socket.Send(buffer, recved);
 	}
+}
+
+void session(Socket client_socket, EndPoint client_address) try
+{
+	Socket server_socket(Socket::Type::Stream, server_address.address.GetFamily());
+
+	std::cout << "- New connection: " << client_address << std::endl;
+	server_socket.Connect(server_address);
+
+	std::thread upstream_thread(upstream, server_socket, client_socket);
+	std::thread downstream_thread(downstream, server_socket, client_socket);
+
+	if(upstream_thread.joinable())
+		upstream_thread.join();
+	if (downstream_thread.joinable())
+		downstream_thread.join();
 }
 catch (std::exception& e)
 {
