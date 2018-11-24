@@ -5,6 +5,8 @@
 #include <sstream>
 #include <tuple>
 
+using namespace nt; // Not recommended.
+
 // global constants
 const char* port = "8080";
 const char* website = "example.com";

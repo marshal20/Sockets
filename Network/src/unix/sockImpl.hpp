@@ -5,13 +5,10 @@
 #include <netdb.h>
 #include <unistd.h>
 
-class sockImpl
+namespace socketimpl
 {
-public:
-	sockImpl();
-	~sockImpl();
 
-	static int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
-	static int socket(int af, int type, int protocol);
+	extern int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
+	extern int socket(int af, int type, int protocol);
 
-};
+}

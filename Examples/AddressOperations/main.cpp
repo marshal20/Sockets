@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 
+using namespace nt; // Not recommended.
+
 int main(int argc, char* argv[]) try
 {
 	std::cout << "IPv4 test: " << Address(IPv4({ 1,2,3,4 })) << std::endl;

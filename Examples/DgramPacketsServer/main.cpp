@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+using namespace nt; // Not recommended.
+
 int main(int argc, char* argv[]) try
 {
 	const char* port = "2000";

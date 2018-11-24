@@ -3,6 +3,8 @@
 #include <string>
 #include <tuple>
 
+using namespace nt; // Not recommended.
+
 int main(int argc, char* argv[]) try
 {
 	const char* port = "3000";

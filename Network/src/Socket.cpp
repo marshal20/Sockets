@@ -6,146 +6,151 @@
 #include <string.h>
 #include "util.hpp"
 
-int get_protocol_length(Family family) {
-	return (family == Family::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
-}
-
-Socket::Socket(Type type, Family family) :
-	m_type(type), m_family(family)
+namespace nt
 {
-	int af = (family == Family::IPv4) ? PF_INET : PF_INET6;
-	int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
 
-	if ((m_sock = sockImpl::socket(af, t, 0)) == -1)
-		Error::runtime("socket failed", errno);
-}
+	int get_protocol_length(Family family) {
+		return (family == Family::IPv4) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+	}
 
-Socket::~Socket()
-{
-}
+	Socket::Socket(Type type, Family family) :
+		m_type(type), m_family(family)
+	{
+		int af = (family == Family::IPv4) ? PF_INET : PF_INET6;
+		int t = (type == Type::Stream) ? SOCK_STREAM : SOCK_DGRAM;
 
-Socket::operator bool() const
-{
-	return (m_sock == -1) ? false : true;
-}
+		if ((m_sock = socketimpl::socket(af, t, 0)) == -1)
+			Error::runtime("socket failed", errno);
+	}
 
-void Socket::close()
-{
-	if (m_sock == -1) return;
-	if (::close(m_sock) == -1)
-		Error::runtime("close failed", errno);
-}
+	Socket::~Socket()
+	{
+	}
 
-void Socket::beBroadcast()
-{
-	if (m_type != Type::Dgram) Error::runtime("can't make a stream socket broadcast");
+	Socket::operator bool() const
+	{
+		return (m_sock == -1) ? false : true;
+	}
 
-	int broadcast = 1;
-	if (setsockopt(m_sock, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) == -1)
-		Error::runtime("setsockopt failed to set socket to broadcast", errno);
-}
+	void Socket::close()
+	{
+		if (m_sock == -1) return;
+		if (::close(m_sock) == -1)
+			Error::runtime("close failed", errno);
+	}
 
-void Socket::connect(const EndPoint& endpoint)
-{
-	int len = get_protocol_length(endpoint.address.m_addr.family);
-	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
-	if(::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
-		Error::runtime("connect failed", errno);
-}
+	void Socket::beBroadcast()
+	{
+		if (m_type != Type::Dgram) Error::runtime("can't make a stream socket broadcast");
 
-void Socket::bind(const EndPoint& endpoint)
-{
-	int len = get_protocol_length(endpoint.address.m_addr.family);
-	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
-	if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
-		Error::runtime("Bind failed", errno);
-}
+		int broadcast = 1;
+		if (setsockopt(m_sock, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) == -1)
+			Error::runtime("setsockopt failed to set socket to broadcast", errno);
+	}
 
-void Socket::listen(int prelog)
-{
-	if (::listen(m_sock, prelog) == -1)
-		Error::runtime("listen failed", errno);
-}
+	void Socket::connect(const EndPoint& endpoint)
+	{
+		int len = get_protocol_length(endpoint.address.m_addr.family);
+		sockaddr_storage temp_sockaddr_storage;
+		create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
+		if (::connect(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
+			Error::runtime("connect failed", errno);
+	}
 
-std::pair<Socket, EndPoint> Socket::accept()
-{
-	Socket sock;
-	Address addr;
-	unsigned short port;
+	void Socket::bind(const EndPoint& endpoint)
+	{
+		int len = get_protocol_length(endpoint.address.m_addr.family);
+		sockaddr_storage temp_sockaddr_storage;
+		create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
+		if (::bind(m_sock, (const sockaddr*)&temp_sockaddr_storage, len) == -1)
+			Error::runtime("Bind failed", errno);
+	}
 
-	addr.m_valid = true;
-	int len = get_protocol_length(m_family);
-	sockaddr_storage temp_sockaddr_storage;
-	if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
-		Error::runtime("accept failed", errno);
+	void Socket::listen(int prelog)
+	{
+		if (::listen(m_sock, prelog) == -1)
+			Error::runtime("listen failed", errno);
+	}
 
-	create_address_from_sockaddr(addr, port, &temp_sockaddr_storage);
+	std::pair<Socket, EndPoint> Socket::accept()
+	{
+		Socket sock;
+		Address addr;
+		unsigned short port;
 
-	return std::make_pair(sock, EndPoint({ addr, port }));
-}
+		addr.m_valid = true;
+		int len = get_protocol_length(m_family);
+		sockaddr_storage temp_sockaddr_storage;
+		if ((sock.m_sock = ::accept(m_sock, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len)) == -1)
+			Error::runtime("accept failed", errno);
 
-int Socket::recv(void* buff, int len)
-{
-	int recieved;
-	if((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
-		Error::runtime("recv failed", errno);
+		create_address_from_sockaddr(addr, port, &temp_sockaddr_storage);
 
-	m_monitor.recv += recieved;
-	return recieved;
-}
+		return std::make_pair(sock, EndPoint({ addr, port }));
+	}
 
-int Socket::send(const void* buff, int len)
-{
-	int sent;
-	if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
-		Error::runtime("send failed", errno);
+	int Socket::recv(void* buff, int len)
+	{
+		int recieved;
+		if ((recieved = ::recv(m_sock, (char*)buff, len, 0)) == -1)
+			Error::runtime("recv failed", errno);
 
-	m_monitor.sent += sent;
-	return sent;
-}
+		m_monitor.recv += recieved;
+		return recieved;
+	}
 
-std::pair<int, EndPoint> Socket::recvfrom(void* buff, int len)
-{
-	Address sender;
-	unsigned short port;
+	int Socket::send(const void* buff, int len)
+	{
+		int sent;
+		if ((sent = ::send(m_sock, (const char*)buff, len, 0)) == -1)
+			Error::runtime("send failed", errno);
 
-	if(m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
+		m_monitor.sent += sent;
+		return sent;
+	}
 
-	int recvd;
-	int len_addr = get_protocol_length(m_family);
-	sockaddr_storage temp_sockaddr_storage;
-	if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
-		Error::runtime("recvfrom failed", errno);
+	std::pair<int, EndPoint> Socket::recvfrom(void* buff, int len)
+	{
+		Address sender;
+		unsigned short port;
 
-	create_address_from_sockaddr(sender, port, &temp_sockaddr_storage);
-	sender.m_valid = true;
-	
-	return std::make_pair(recvd, EndPoint({ sender, port }));
-}
+		if (m_type != Type::Dgram) Error::runtime("call to recvfrom with non Dgram socket");
 
-int Socket::sendto(const void* buff, int len, const EndPoint& endpoint)
-{
-	if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
+		int recvd;
+		int len_addr = get_protocol_length(m_family);
+		sockaddr_storage temp_sockaddr_storage;
+		if ((recvd = ::recvfrom(m_sock, (char*)buff, len, 0, (sockaddr*)&temp_sockaddr_storage, (socklen_t*)&len_addr)) == -1)
+			Error::runtime("recvfrom failed", errno);
 
-	int len_addr = get_protocol_length(endpoint.address.m_addr.family);
-	sockaddr_storage temp_sockaddr_storage;
-	create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
+		create_address_from_sockaddr(sender, port, &temp_sockaddr_storage);
+		sender.m_valid = true;
 
-	int sent;
-	if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)
-		Error::runtime("sendto failed", errno);
+		return std::make_pair(recvd, EndPoint({ sender, port }));
+	}
 
-	m_monitor.sent += sent;
-	return sent;
-}
+	int Socket::sendto(const void* buff, int len, const EndPoint& endpoint)
+	{
+		if (m_type != Type::Dgram) Error::runtime("call to sendto with non Dgram socket");
+
+		int len_addr = get_protocol_length(endpoint.address.m_addr.family);
+		sockaddr_storage temp_sockaddr_storage;
+		create_sockaddr_from_address(endpoint.address, endpoint.port, &temp_sockaddr_storage);
+
+		int sent;
+		if ((sent = ::sendto(m_sock, (const char*)buff, len, 0, (const sockaddr*)&temp_sockaddr_storage, len_addr)) == -1)
+			Error::runtime("sendto failed", errno);
+
+		m_monitor.sent += sent;
+		return sent;
+	}
 
 
-int Socket::getTotalrecv() const {
-	return m_monitor.recv;
-}
+	int Socket::getTotalrecv() const {
+		return m_monitor.recv;
+	}
 
-int Socket::getTotalsent() const {
-	return m_monitor.sent;
+	int Socket::getTotalsent() const {
+		return m_monitor.sent;
+	}
+
 }

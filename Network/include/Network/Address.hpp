@@ -5,48 +5,56 @@
 #include <iostream>
 #include <utility>
 
-struct IPv4 {
-	unsigned char a, b, c, d;
-};
+struct sockaddr_storage;
 
-struct IPv6 {
-	unsigned short a, b, c, d, e, f, g, h;
-};
-
-struct Addr
+namespace nt
 {
-	Family family;
-	union
-	{
-		IPv4 v4;
-		IPv6 v6;
+
+	struct IPv4 {
+		unsigned char a, b, c, d;
 	};
-};
 
-class Address
-{
-public:
-	Address();
-	Address(const IPv4& value);
-	Address(const IPv6& value);
-	~Address();
+	struct IPv6 {
+		unsigned short a, b, c, d, e, f, g, h;
+	};
 
-	friend std::ostream& operator<<(std::ostream& os, const Address& addr);
+	struct Addr
+	{
+		Family family;
+		union
+		{
+			IPv4 v4;
+			IPv6 v6;
+		};
+	};
 
-	Family getFamily() const;
-	std::string getPresentation() const;
+	class Address
+	{
+	public:
+		Address();
+		Address(const IPv4& value);
+		Address(const IPv6& value);
+		~Address();
 
-	static std::vector<Address> fromPresentationAll(const std::string& rep);
-	static Address fromPresentation(const std::string& rep);
-	static Address localhost(Family family = Family::IPv4);
-	static Address thishost(Family family = Family::IPv4);
-	static Address broadcast();
+		friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
-private:
-	friend class Socket;
-	friend void create_sockaddr_from_address(const Address&, unsigned short, struct sockaddr_storage*);
+		Family getFamily() const;
+		std::string getPresentation() const;
 
-private:
-	Addr m_addr;
-	bool m_valid = false;
-};
+		static std::vector<Address> fromPresentationAll(const std::string& rep);
+		static Address fromPresentation(const std::string& rep);
+		static Address localhost(Family family = Family::IPv4);
+		static Address thishost(Family family = Family::IPv4);
+		static Address broadcast();
+
+	private:
+		friend class Socket;
+		friend void create_sockaddr_from_address(const Address&, unsigned short, sockaddr_storage*);
+
+	private:
+		Addr m_addr;
+		bool m_valid = false;
+	};
+
+}
+

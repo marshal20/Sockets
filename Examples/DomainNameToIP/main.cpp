@@ -1,6 +1,8 @@
 #include <Network/Network.hpp>
 #include <iostream>
 
+using namespace nt; // Not recommended.
+
 int main(int argc, char* argv[]) try
 {
 	if (argc != 2)

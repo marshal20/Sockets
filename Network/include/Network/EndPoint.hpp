@@ -5,8 +5,13 @@
 A pair of Address and port is called a socket address or endpoint.
 */
 
-struct EndPoint
+namespace nt
 {
-	Address address;
-	unsigned short port;
-};
+
+	struct EndPoint
+	{
+		Address address;
+		unsigned short port;
+	};
+
+}

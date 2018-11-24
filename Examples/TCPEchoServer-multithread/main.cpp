@@ -4,6 +4,8 @@
 #include <tuple>
 #include <thread>
 
+using namespace nt; // Not recommended.
+
 void session(Socket remote_socket, EndPoint remote_endpoint) try
 {
 	// new connection
