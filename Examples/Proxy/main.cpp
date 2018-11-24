@@ -7,7 +7,7 @@ using namespace nt; // Not recommended.
 
 EndPoint server_address;
 
-void upstream(Socket server_socket, Socket client_socket)
+void upstream(Socket server_socket, Socket client_socket) try
 {
 	char buffer[2048];
 	int recved;
@@ -16,13 +16,20 @@ void upstream(Socket server_socket, Socket client_socket)
 	{
 		recved = client_socket.Recv(buffer, sizeof(buffer));
 		if (recved == 0)
+		{
+			server_socket.Send(0, 0);
 			break;
+		}
 
 		server_socket.Send(buffer, recved);
 	}
 }
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
+}
 
-void downstream(Socket server_socket, Socket client_socket)
+void downstream(Socket server_socket, Socket client_socket) try
 {
 	char buffer[2048];
 	int recved;
@@ -31,10 +38,17 @@ void downstream(Socket server_socket, Socket client_socket)
 	{
 		recved = server_socket.Recv(buffer, sizeof(buffer));
 		if (recved == 0)
+		{
+			client_socket.Send(0, 0);
 			break;
+		}
 
 		client_socket.Send(buffer, recved);
 	}
+}
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
 }
 
 void session(Socket client_socket, EndPoint client_address) try
