@@ -49,7 +49,7 @@ namespace nt
 	// Works with value in network byte order.
 	Address create_address_from_ipv4addr(uint32_t inaddr)
 	{
-		const unsigned char* vals = (const unsigned char*)&inaddr;
+		const uint8_t* vals = (const uint8_t*)&inaddr;
 
 		return IPv4{
 			vals[0],
@@ -62,7 +62,7 @@ namespace nt
 	// Works with value in network byte order.
 	Address create_address_from_ipv6addr(const struct in6_addr* in6addr)
 	{
-		const unsigned short* vals = (const unsigned short*)in6addr;
+		const uint16_t* vals = (const uint16_t*)in6addr;
 
 		return IPv6{
 			ntohs(vals[0]),
