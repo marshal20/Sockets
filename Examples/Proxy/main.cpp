@@ -15,13 +15,10 @@ void upstream(Socket server_socket, Socket client_socket) try
 	while (true)
 	{
 		recved = client_socket.Recv(buffer, sizeof(buffer));
-		if (recved == 0)
-		{
-			server_socket.Send(0, 0);
-			break;
-		}
+		server_socket.SendAll(buffer, recved);
 
-		server_socket.Send(buffer, recved);
+		if (recved == 0)
+			break;
 	}
 }
 catch (std::exception& e)
@@ -37,13 +34,10 @@ void downstream(Socket server_socket, Socket client_socket) try
 	while (true)
 	{
 		recved = server_socket.Recv(buffer, sizeof(buffer));
-		if (recved == 0)
-		{
-			client_socket.Send(0, 0);
-			break;
-		}
+		client_socket.SendAll(buffer, recved);
 
-		client_socket.Send(buffer, recved);
+		if (recved == 0)
+			break;
 	}
 }
 catch (std::exception& e)
@@ -61,12 +55,14 @@ void session(Socket client_socket, EndPoint client_address) try
 	std::thread upstream_thread(upstream, server_socket, client_socket);
 	std::thread downstream_thread(downstream, server_socket, client_socket);
 
-	if(upstream_thread.joinable())
+	if (upstream_thread.joinable())
 		upstream_thread.join();
 	if (downstream_thread.joinable())
 		downstream_thread.join();
 
 	server_socket.Close();
+	client_socket.Close();
+	std::cout << "- End connection: " << client_address << std::endl;
 }
 catch (std::exception& e)
 {
