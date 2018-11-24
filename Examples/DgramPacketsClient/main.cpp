@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) try
 	if (argc == 3)
 		port = argv[2];
 
-	Address remoteTarget = Address::FromPresentation(domainname);
+	Address remoteTarget = Address(domainname);
 
 	Socket sock(Socket::Type::Dgram, remoteTarget.GetFamily());
 	sock.BeBroadcast();

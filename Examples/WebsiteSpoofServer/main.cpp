@@ -60,7 +60,7 @@ void serveClient(Socket client_sock)
 	int currec;
 
 	Socket server_sock;
-	server_sock.Connect({ Address::FromPresentation(website), 80 });
+	server_sock.Connect({ Address(website), 80 });
 
 	bool close = false;
 	while (!close)

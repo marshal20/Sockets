@@ -34,6 +34,7 @@ namespace nt
 		Address();
 		Address(const IPv4& value);
 		Address(const IPv6& value);
+		Address(const std::string& presentation);
 		~Address();
 
 		friend std::ostream& operator<<(std::ostream& os, const Address& addr);
@@ -42,7 +43,6 @@ namespace nt
 		std::string GetPresentation() const;
 
 		static std::vector<Address> FromPresentationAll(const std::string& rep);
-		static Address FromPresentation(const std::string& rep);
 
 		static Address Localhost(Family family = Family::IPv4);
 		static Address Thishost(Family family = Family::IPv4);

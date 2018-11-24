@@ -33,6 +33,11 @@ namespace nt
 		m_addr.v6 = value;
 	}
 
+	Address::Address(const std::string& presentation) :
+		Address(FromPresentationAll(presentation)[0])
+	{
+	}
+
 	Address::~Address()
 	{
 	}
@@ -105,11 +110,6 @@ namespace nt
 		freeaddrinfo(res);
 
 		return addrs;
-	}
-
-	Address Address::FromPresentation(const std::string& rep)
-	{
-		return FromPresentationAll(rep)[0];
 	}
 
 	Address Address::Localhost(Family family)
