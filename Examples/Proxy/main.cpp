@@ -51,6 +51,8 @@ void session(Socket client_socket, EndPoint client_address) try
 		upstream_thread.join();
 	if (downstream_thread.joinable())
 		downstream_thread.join();
+
+	server_socket.Close();
 }
 catch (std::exception& e)
 {
