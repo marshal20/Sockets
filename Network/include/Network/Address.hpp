@@ -11,11 +11,11 @@ namespace nt
 {
 
 	struct IPv4 {
-		unsigned char a, b, c, d;
+		uint8_t a, b, c, d;
 	};
 
 	struct IPv6 {
-		unsigned short a, b, c, d, e, f, g, h;
+		uint16_t a, b, c, d, e, f, g, h;
 	};
 
 	struct Addr
