@@ -2,8 +2,30 @@
 #include <iostream>
 #include <string>
 #include <tuple>
+#include <thread>
 
 using namespace nt; // Not recommended.
+
+void session(Socket remote_socket, EndPoint remote_endpoint) try
+{
+	// new connection
+	std::cout << "- Info: new session, Address: "
+		<< remote_endpoint.address << ":" << remote_endpoint.port << std::endl;
+
+	char buff[1024];
+	int currec;
+	while ((currec = remote_socket.recv(buff, sizeof(buff))) != 0)
+	{
+		remote_socket.send(buff, currec);
+	}
+
+	printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
+		remote_socket.getTotalrecv(), remote_socket.getTotalsent());
+}
+catch (std::exception& e)
+{
+	std::cout << "- Error:" << std::endl << e.what() << std::endl;
+}
 
 int main(int argc, char* argv[]) try
 {
@@ -23,23 +45,13 @@ int main(int argc, char* argv[]) try
 	std::cout << "- Info: socket bound to " << localhostTarget << " port: " << port << std::endl;
 	sock.listen();
 
-	Socket new_sock; EndPoint new_endpoint;
 	while (true)
 	{
+		// Accept the new connection
+		Socket new_sock; EndPoint new_endpoint;
 		std::tie(new_sock, new_endpoint) = sock.accept();
-
-		// new connection
-		std::cout << "- Info: new connection, Address: " << new_endpoint.address << std::endl;
-
-		char buff[1024];
-		int currec;
-		while ((currec = new_sock.recv(buff, sizeof(buff))) != 0)
-		{
-			new_sock.send(buff, currec);
-		}
-
-		printf("- Info: connection closed, receved: %d bytes, sent: %d bytes\n",
-			new_sock.getTotalrecv(), new_sock.getTotalsent());
+		// Create a session thread then detach it.
+		std::thread(session, new_sock, new_endpoint).detach();
 	}
 
 	sock.close();

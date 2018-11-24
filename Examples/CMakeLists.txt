@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 add_subdirectory(DomainNameToIP)
 add_subdirectory(TCPEchoServer)
-add_subdirectory(TCPEchoServer-multithread)
 add_subdirectory(AddressOperations)
 add_subdirectory(DgramPacketsServer)
 add_subdirectory(DgramPacketsClient)
