@@ -16,11 +16,19 @@ namespace nt
 			Dgram
 		};
 
+		enum class How
+		{
+			Read = 1,
+			Write,
+			ReadWrite
+		};
+
 		Socket(Type type = Type::Stream, Family family = Family::IPv4);
 		~Socket();
 
 		operator bool() const;
 
+		void Shutdown(How how);
 		void Close();
 		void BeBroadcast();
 

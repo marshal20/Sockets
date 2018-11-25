@@ -32,6 +32,15 @@ namespace nt
 		return (m_sock == -1) ? false : true;
 	}
 
+	void Socket::Shutdown(How how)
+	{
+		if (m_sock == -1) return;
+
+		int how_pram = (how == How::Read) ? SHUT_RD : ((how == How::Write) ? SHUT_WR : SHUT_RDWR);
+		if (::shutdown(m_sock, how_pram) == -1)
+			Error::runtime("shutdown failed", errno);
+	}
+
 	void Socket::Close()
 	{
 		if (m_sock == -1) return;

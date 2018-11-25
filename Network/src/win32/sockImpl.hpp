@@ -4,6 +4,10 @@
 //#include <ws2def.h>
 #include <ws2tcpip.h>
 
+#define SHUT_RD SD_RECEIVE
+#define SHUT_WR SD_SEND
+#define SHUT_RDWR SD_BOTH
+
 typedef int socklen_t;
 
 extern int close(int sock);
