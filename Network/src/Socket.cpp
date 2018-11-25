@@ -36,7 +36,15 @@ namespace nt
 	{
 		if (m_sock == -1) return;
 
-		int how_pram = (how == How::Read) ? SHUT_RD : ((how == How::Write) ? SHUT_WR : SHUT_RDWR);
+		int how_pram = 0;
+		switch (how)
+		{
+		case How::Read: how_pram = SHUT_RD; break;
+		case How::Write: how_pram = SHUT_WR; break;
+		case How::ReadWrite: how_pram = SHUT_RDWR; break;
+		default: how_pram = 0;
+		}
+
 		if (::shutdown(m_sock, how_pram) == -1)
 			Error::runtime("shutdown failed", errno);
 	}

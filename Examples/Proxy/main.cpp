@@ -9,17 +9,19 @@ EndPoint server_address;
 
 void upstream(Socket server_socket, Socket client_socket) try
 {
-	char buffer[2048];
+	char buffer[8192];
 	int recved;
 
 	while (true)
 	{
 		recved = client_socket.Recv(buffer, sizeof(buffer));
-		server_socket.SendAll(buffer, recved);
-
-		if (recved == 0)
+		if (recved <= 0)
 			break;
+		server_socket.SendAll(buffer, recved);
 	}
+
+	client_socket.Shutdown(Socket::How::ReadWrite);
+	server_socket.Shutdown(Socket::How::ReadWrite);
 }
 catch (std::exception& e)
 {
@@ -28,17 +30,19 @@ catch (std::exception& e)
 
 void downstream(Socket server_socket, Socket client_socket) try
 {
-	char buffer[2048];
+	char buffer[8192];
 	int recved;
 
 	while (true)
 	{
 		recved = server_socket.Recv(buffer, sizeof(buffer));
-		client_socket.SendAll(buffer, recved);
-
-		if (recved == 0)
+		if (recved <= 0)
 			break;
+		client_socket.SendAll(buffer, recved);
 	}
+
+	client_socket.Shutdown(Socket::How::ReadWrite);
+	server_socket.Shutdown(Socket::How::ReadWrite);
 }
 catch (std::exception& e)
 {
