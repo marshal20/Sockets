@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include <string.h>
 
 namespace nt
 {

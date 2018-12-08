@@ -2,7 +2,12 @@
 #include <string>
 #include <exception>
 #include <stdexcept>
+#include <string.h>
 #include <errno.h>
+
+#if not WIN32
+#define strerror_s(b, s, c) strerror_r(c, b, s)
+#endif
 
 namespace Error
 {
